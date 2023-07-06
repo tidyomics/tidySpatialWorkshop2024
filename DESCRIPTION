@@ -1,6 +1,6 @@
-Package: tidyomicsWorkshop
+Package: tidyomicsWorkshopBioc2023
 Title: Tidy genomic and transcriptomic analyses 
-Version: 0.16.2
+Version: 0.16.3
 Authors@R: 
     c(
     person(given = "Stefano",
@@ -26,40 +26,23 @@ Depends:
     Biobase,
     R (>= 4.2.0)
 Imports:
-    SummarizedExperiment, 
     SingleCellExperiment,
-    tidySummarizedExperiment,
-    tidySingleCellExperiment,
-    tidygate,
-    stats,
-    utils,
-    tibble,
-    stringr,
     ggplot2,
-    dplyr,
-    readr,
-    tidyr,
-    purrr,
-    forcats,
-    ggrepel,
     plotly,
-    igraph,
-    broom,
-    devtools,
-    rlang,
-    magrittr,
-    R.utils,
+    dplyr,
+    colorspace,
     dittoSeq,
-    tidybulk,
-    glue,
+    tidySingleCellExperiment,
+    scales,
+    batchelor,
     scater,
-    batchelor
+    purrr
 Suggests:
     knitr,
     rmarkdown,
     pkgdown
 Biarch: true
-URL: https://tidy-biology.github.io/TidyGenomicsTranscriptomicsWorkshop
-BugReports: https://github.com/tidy-biology/TidyGenomicsTranscriptomicsWorkshop/issues/new/choose
+URL: https://tidybiology.github.io/tidyomicsWorkshopBioc2023
+BugReports: https://github.com/tidybiology/tidyomicsWorkshopBioc2023/issues/new/choose
 VignetteBuilder: knitr
-DockerImage: ghcr.io/tidy-biology/TidyGenomicsTranscriptomicsWorkshop:latest
+DockerImage: ghcr.io/tidybiology/tidyomicsWorkshopBioc2023:latest

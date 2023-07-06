@@ -1,0 +1,553 @@
+---
+title: "Tidy Transcriptomics for Single-cell RNA Sequencing Analyses with Bioconductor"
+author:
+  - Maria Doyle, Peter MacCallum Cancer Centre^[<maria.doyle at petermac.org>]
+  - Stefano Mangiola, Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
+output: rmarkdown::html_vignette
+bibliography: "`r file.path(system.file(package='tidyomicsWorkshopBioc2023', 'vignettes'), 'tidytranscriptomics.bib')`"
+vignette: >
+  %\VignetteIndexEntry{Tidy Transcriptomics for Single-cell RNA Sequencing Analyses with Bioconductor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructors
+
+*Dr. Stefano Mangiola* is currently a Postdoctoral researcher in the
+laboratory of Prof. Tony Papenfuss at the Walter and Eliza Hall
+Institute in Melbourne, Australia. His background spans from
+biotechnology to bioinformatics and biostatistics. His research
+focuses on prostate and breast tumour microenvironment, the
+development of statistical models for the analysis of RNA sequencing
+data, and data analysis and visualisation interfaces. 
+
+## Workshop goals and objectives
+
+### What you will learn
+
+-   Basic `tidy` operations possible with `tidySingleCellExperiment`
+-   How to interface `SingleCellExperiment` with tidy manipulation and
+    visualisation 
+-   A real-world case study that will showcase the power of `tidy`
+    single-cell methods compared with base/ad-hoc methods 
+
+### What you will *not* learn
+
+-   The molecular technology of single-cell sequencing
+-   The fundamentals of single-cell data analysis
+-   The fundamentals of tidy data analysis
+
+## Getting started
+
+### Local
+
+We will use the Cloud during the workshop and this method is available
+if you want to run the material after the workshop. If you want to
+install on your own computer, see instructions 
+[here](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/index.html#workshop-package-installation).
+
+Alternatively, you can view the material at the workshop webpage 
+[here](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/articles/main.html).
+
+## Introduction to tidytranscriptomics
+
+[Here](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf)
+
+<!--
+
+<iframe 
+src="https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf&embedded=true" 
+scrolling="yes" 
+style="width:100%; height:600px;" 
+frameborder="0">
+</iframe>
+
+-->
+
+# Part 1 Introduction to tidySingleCellExperiment
+
+```{r message = FALSE}
+# Load packages
+library(SingleCellExperiment)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(colorspace)
+library(dittoSeq)
+```
+
+SingleCellExperiment is a very popular analysis toolkit for single
+cell RNA sequencing data [@butler2018integrating;
+@stuart2019comprehensive]. 
+
+Here we load single-cell data in SingleCellExperiment object
+format. This data is peripheral blood mononuclear cells (PBMCs) from
+metastatic breast cancer patients.
+
+
+```{r}
+# load single cell RNA sequencing data
+sce_obj <- tidyomicsWorkshopBioc2023::sce_obj
+
+# take a look
+sce_obj
+```
+
+tidySingleCellExperiment provides a bridge between the
+SingleCellExperiment single-cell package and the tidyverse
+[@wickham2019welcome]. It creates an invisible layer that enables
+viewing the SingleCellExperiment object as a tidyverse tibble, and
+provides SingleCellExperiment-compatible *dplyr*, *tidyr*, *ggplot*
+and *plotly* functions. 
+
+If we load the *tidySingleCellExperiment* package and then view the
+single cell data, it now displays as a tibble. 
+
+```{r message = FALSE}
+library(tidySingleCellExperiment)
+
+sce_obj
+```
+
+If we want to revert to the standard SingleCellExperiment view we can do that.
+
+```{r}
+options("restore_SingleCellExperiment_show" = TRUE)
+sce_obj
+```
+
+If we want to revert back to tidy SingleCellExperiment view we can.
+
+```{r}
+options("restore_SingleCellExperiment_show" = FALSE)
+sce_obj
+```
+
+It can be interacted with using 
+[SingleCellExperiment commands](https://bioconductor.org/packages/devel/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) 
+such as `assays`.
+
+```{r}
+assays(sce_obj)
+```
+
+We can also interact with our object as we do with any tidyverse tibble.
+
+## Tidyverse commands
+
+We can use tidyverse commands, such as `filter`, `select` and `mutate`
+to explore the tidySingleCellExperiment object. Some examples are
+shown below and more can be seen at the tidySingleCellExperiment
+website
+[here](https://stemangiola.github.io/tidySingleCellExperiment/articles/introduction.html#tidyverse-commands-1).
+
+We can use `filter` to choose rows, for example, to see just the rows for the cells in G1 cell-cycle stage.
+
+```{r}
+sce_obj |> filter(Phase == "G1")
+```
+
+We can use `select` to view columns, for example, to see the filename,
+total cellular RNA abundance and cell phase. 
+
+* If we use `select` we will also get any view-only columns returned,
+  such as the UMAP columns generated during the preprocessing. 
+
+```{r}
+sce_obj |> select(.cell, file, nCount_RNA, Phase)
+```
+
+We can use `mutate` to create a column. For example, we could create a
+new `Phase_l` column that contains a lower-case version of `Phase`. 
+
+```{r message=FALSE}
+sce_obj |>
+  mutate(Phase_l = tolower(Phase)) |>
+  select(.cell, Phase, Phase_l)
+```
+
+We can use tidyverse commands to polish an annotation column. We will
+extract the sample, and group information from the file name column
+into separate columns. 
+
+```{r message=FALSE}
+# First take a look at the file column
+sce_obj |> select(.cell, file)
+```
+
+```{r}
+# Create column for sample
+sce_obj <- sce_obj |>
+  # Extract sample
+  extract(file, "sample", "../data/.*/([a-zA-Z0-9_-]+)/outs.+", remove = FALSE)
+
+# Take a look
+sce_obj |> select(.cell, sample, everything())
+```
+
+We could use tidyverse `unite` to combine columns, for example to
+create a new column for sample id combining the sample and patient id
+(BCB) columns.
+
+```{r message=FALSE}
+sce_obj <- sce_obj |> unite("sample_id", sample, BCB, remove = FALSE)
+
+# Take a look
+sce_obj |> select(.cell, sample_id, sample, BCB)
+```
+
+
+# Part 2 Signature visualisation
+
+## Data pre-processing
+
+The object `sce_obj` we've been using was created as part of a study
+on breast cancer systemic immune response. Peripheral blood
+mononuclear cells have been sequenced for RNA at the single-cell
+level. The steps used to generate the object are summarised below. 
+
+-   `scran`, `scater`, and `DropletsUtils` packages have been used to
+    eliminate empty droplets and dead cells. Samples were individually
+    quality checked and cells were filtered for good gene coverage .
+
+-   Variable features were identified using `modelGeneVar`.
+
+-   Read counts were scaled and normalised using logNormCounts from `scuttle`.
+
+-   Data integration was performed using `fastMNN` with default parameters.
+
+-   PCA performed to reduce feature dimensionality.
+
+-   Nearest-neighbor cell networks were calculated using 30 principal components.
+
+-   2 UMAP dimensions were calculated using 30 principal components.
+
+-   Cells with similar transcriptome profiles were grouped into clusters using Louvain clustering from `scran`.
+
+## Analyse custom signature
+
+The researcher analysing this dataset wanted to identify gamma delta T
+cells using a gene signature from a published paper
+[@Pizzolato2019]. We'll show how that can be done here. 
+
+With tidySingleCellExperiment's `join_features` we can view the counts
+for genes in the signature as columns joined to our single cell
+tibble. 
+
+```{r}
+sce_obj |>
+  join_features(c("CD3D", "TRDC", "TRGC1", "TRGC2", "CD8A", "CD8B"), shape = "wide")
+```
+
+We can use tidyverse `mutate` to create a column containing the
+signature score. To generate the score, we scale the sum of the 4
+genes, CD3D, TRDC, TRGC1, TRGC2, and subtract the scaled sum of the 2
+genes, CD8A and CD8B. `mutate` is powerful in enabling us to perform
+complex arithmetic operations easily. 
+
+```{r}
+sce_scored <- sce_obj |>
+    
+  join_features(c("CD3D", "TRDC", "TRGC1", "TRGC2", "CD8A", "CD8B"), shape = "wide") |>
+    
+  mutate(
+    signature_score =
+      scales::rescale(CD3D + TRDC + TRGC1 + TRGC2, to = c(0, 1)) -
+        scales::rescale(CD8A + CD8B, to = c(0, 1))
+  )
+
+sce_scored |>
+  
+  select(.cell, signature_score, everything())
+```
+
+The gamma delta T cells could then be visualised by the signature
+score using Bioconductor's visualisation functions. 
+
+```{r}
+sce_scored |>
+    
+  scater::plotUMAP(colour_by = "signature_score")
+```
+
+The cells could also be visualised using the popular and powerful
+`ggplot2` package, enabling the researcher to use ggplot functions
+they were familiar with, and to customise the plot with great
+flexibility. 
+
+```{r}
+sce_scored |>
+    
+  # plot cells with high score last so they're not obscured by other cells
+  arrange(signature_score) |>
+    
+  ggplot(aes(UMAP_1, UMAP_2, color = signature_score)) +
+  geom_point() +
+  scale_color_distiller(palette = "Spectral") +
+  tidyomicsWorkshopBioc2023::theme_multipanel
+```
+
+For exploratory analyses, we can select the gamma delta T cells, the
+red cluster on the left with high signature score. We'll filter for
+cells with a signature score > 0.7. 
+
+```{r}
+sce_obj_gamma_delta <-
+    
+  sce_scored |>
+    
+	# Proper cluster selection should be used instead (see supplementary material)
+  filter(signature_score > 0.7)
+```
+
+For comparison, we show the alternative using base R and
+SingleCellExperiment. Note that the code contains more redundancy and
+intermediate objects. 
+
+```{r eval=FALSE}
+counts_positive <-
+  assay(sce_obj, "logcounts")[c("CD3D", "TRDC", "TRGC1", "TRGC2"), ] |>
+  colSums() |>
+  scales::rescale(to = c(0, 1))
+
+counts_negative <-
+  assay(sce_obj, "logcounts")[c("CD8A", "CD8B"), ] |>
+  colSums() |>
+  scales::rescale(to = c(0, 1))
+
+sce_obj$signature_score <- counts_positive - counts_negative
+
+sce_obj_gamma_delta <- sce_obj[, sce_obj$signature_score > 0.7]
+```
+
+We can then focus on just these gamma delta T cells and chain Bioconductor and tidyverse commands together to analyse.
+
+```{r warning=FALSE, message=FALSE}
+library(batchelor)
+library(scater)
+
+sce_obj_gamma_delta <-
+    
+  sce_obj_gamma_delta |>
+    
+  # Integrate - using batchelor.
+  multiBatchNorm(batch = colData(sce_obj_gamma_delta)$sample) |>
+  fastMNN(batch = colData(sce_obj_gamma_delta)$sample) |>
+    
+  # Join metadata removed by fastMNN - using tidyverse
+  left_join(as_tibble(sce_obj_gamma_delta)) |>
+    
+  # Dimension reduction - using scater
+  runUMAP(ncomponents = 2, dimred = "corrected")
+```
+
+Visualise gamma delta T cells. As we have used rough threshold we are
+left with only few cells. Proper cluster selection should be used
+instead (see supplementary material). 
+
+```{r}	
+sce_obj_gamma_delta |> plotUMAP()	
+```
+
+
+It is also possible to visualise the cells as a 3D plot using plotly.
+The example data used here only contains a few genes, for the sake of
+time and size in this demonstration, but below is how you could
+generate the 3 dimensions needed for 3D plot with a full dataset.
+
+```{r eval = FALSE}
+single_cell_object |>
+  RunUMAP(dims = 1:30, n.components = 3L, spread = 0.5, min.dist = 0.01, n.neighbors = 10L)
+```
+
+We'll demonstrate creating a 3D plot using some data that has 3 UMAP
+dimensions. This is a fantastic way to visualise both reduced
+dimensions and metadata in the same representation.
+
+```{r umap plot 2, message = FALSE, warning = FALSE}
+pbmc <- tidyomicsWorkshopBioc2023::sce_obj_UMAP3
+
+pbmc |>
+  plot_ly(
+    x = ~`UMAP_1`,
+    y = ~`UMAP_2`,
+    z = ~`UMAP_3`,
+    color = ~cell_type,
+    colors = dittoSeq::dittoColors()
+  ) %>%
+  add_markers(size = I(1))
+```
+
+## Exercises
+
+Using the `sce_obj`:
+
+1. What proportion of all cells are gamma-delta T cells? Use
+   signature_score > 0.7 to identify gamma-delta T cells. 
+
+2. There is a cluster of cells characterised by a low RNA output
+   (nCount_RNA < 100). Identify the cell composition (cell_type) of
+   that cluster. 
+
+# Part 3 Nested analyses
+
+When analysing single cell data is sometimes necessary to perform
+calculations on data subsets. For example, we might want to estimate
+difference in mRNA abundance between two condition for each cell
+type. 
+
+`tidyr` and `purrr` offer a great tool to perform iterativre analyses
+in a functional way.
+
+We use tidyverse `nest` to group the data. The command below will
+create a tibble containing a column with a SummarizedExperiment object
+for each cell type. `nest` is similar to tidyverse `group_by`, except
+with `nest` each group is stored in a single row, and can be a complex
+object such as `SingleCellExperiment`. 
+
+Let's import some libraries
+
+```{r}
+library(purrr)
+```
+
+First let's have a look to the cell types that constitute this dataset
+
+```{r nest SingleCellExperiment count}
+sce_obj |> 
+  count(cell_type)
+```
+
+Let's group the cells based on cell identity using `nest`
+
+```{r nest SingleCellExperiment }
+
+sce_obj_nested <-
+  sce_obj |> 
+  nest(sce = -cell_type) 
+
+sce_obj_nested
+```
+
+Let's see what the first element of the Surat column looks like 
+
+```{r nest sce 2}
+sce_obj_nested |> 
+  slice(1) |> 
+  pull(sce)
+```
+
+Now, let's perform a differential gene-transcript abundance analysis
+between the two conditions for each cell type. 
+
+```{r nest sce integrate, message=FALSE}
+sce_obj_nested <-
+  sce_obj_nested |> 
+  
+  # Filter for sample with more than 30 cells
+  mutate(sce = map(sce, ~ .x |> add_count(sample) |> filter(n > 50))) |>
+  filter(map_int(sce, ncol) > 0) |>
+
+  # Select significant genes
+  mutate(sce = imap(
+    sce,
+    ~ .x %>% {print(.y); (.)} |> 
+    
+    # Integrate - using batchelor.
+    multiBatchNorm(batch = colData(.x)$sample) |>
+    fastMNN(batch = colData(.x)$sample) |>
+      
+    # Join metadata removed by fastMNN - using tidyverse
+    left_join(as_tibble(.x)) |>
+      
+    # Dimension reduction - using scater
+    runUMAP(ncomponents = 2, dimred = "corrected")
+  
+  ))
+
+sce_obj_nested
+```
+
+We can the lies the top genes with the heat map iteratively across the
+cell types
+
+```{r nest sce heatmap, message=FALSE}
+sce_obj_nested <-
+  sce_obj_nested |> 
+  
+  # Build heatmaps
+  mutate(umap = map(sce,plotUMAP)) 
+
+sce_obj_nested
+```
+
+Let's have a look to the first heatmap
+
+```{r nest sce heatmap 2, fig.width=8, fig.height=8}
+sce_obj_nested |> 
+  slice(1) |> 
+  pull(umap)
+```
+
+You can do this whole analysis without saving any temporary variable using the piping functionality of tidy R programming 
+
+```{r nest sce heatmap all, eval=FALSE}
+sce_obj |> 
+  
+  # Nest
+  nest(sce = -cell_type) |> 
+  
+  # Filter for sample with more than 30 cells
+  mutate(sce = map(sce, ~ .x |> add_count(sample) |> filter(n > 50))) |>
+  filter(map_int(sce, ncol) > 0) |>
+
+  # Select significant genes
+  mutate(sce = imap(
+    sce,
+    ~ .x %>% {print(.y); (.)} |> 
+    
+    # Integrate - using batchelor.
+    multiBatchNorm(batch = colData(.x)$sample) |>
+    fastMNN(batch = colData(.x)$sample) |>
+      
+    # Join metadata removed by fastMNN - using tidyverse
+    left_join(as_tibble(.x)) |>
+      
+    # Dimension reduction - using scater
+    runUMAP(ncomponents = 2, dimred = "corrected")
+  
+  )) |>
+  
+   # Build heatmaps
+  mutate(umap = map(sce,plotUMAP))  |> 
+  
+  # Extract heatmaps
+  pull(umap)
+```
+
+### Exercises
+
+1. Let's suppose that you want to perform the analyses only for cell
+   types that have a total number of cells bigger than 1000. For
+   example, if a cell type has less than a sum of 1000 cells across
+   all samples, that cell type will be dropped from the dataset. 
+
+- Answer this question avoiding to save temporary variables, and using
+  the function add_count to count the cells (before nesting), and then
+  filter 
+- Answer this question avoiding to save temporary variables, and using
+  the function map_int to count the cells (after nesting), and the
+  filter 
+
+
+**Session Information**
+
+```{r}
+sessionInfo()
+```
+
+**References**

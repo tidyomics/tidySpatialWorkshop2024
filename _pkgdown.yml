@@ -1,4 +1,4 @@
-url: https://tidy-biology.github.io/TidyGenomicsTranscriptomicsWorkshop
+url: https://tidybiology.github.io/tidyomicsWorkshopBioc2023
 
 template:
   params:
@@ -6,10 +6,10 @@ template:
     #ganalytics: UA-99999999-9
 
 home:
-  title: "TidyGenomicsTranscriptomicsWorkshop"
+  title: "tidyomicsWorkshopBioc2023"
   type: inverse
 
 navbar:
   right:
    - icon: fa-github
-     href: https://github.com/tidy-biology/TidyGenomicsTranscriptomicsWorkshop
+     href: https://github.com/tidybiology/tidyomicsWorkshopBioc2023
