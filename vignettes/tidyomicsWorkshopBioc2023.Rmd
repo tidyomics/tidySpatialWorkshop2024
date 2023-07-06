@@ -12,7 +12,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 ## Instructors
@@ -154,8 +154,8 @@ sce_obj |> filter(Phase == "G1")
 We can use `select` to view columns, for example, to see the filename,
 total cellular RNA abundance and cell phase. 
 
-* If we use `select` we will also get any view-only columns returned,
-  such as the UMAP columns generated during the preprocessing. 
+If we use `select` we will also get any view-only columns returned,
+such as the UMAP columns generated during the preprocessing.
 
 ```{r}
 sce_obj |> select(.cell, file, nCount_RNA, Phase)
@@ -324,7 +324,8 @@ sce_obj$signature_score <- counts_positive - counts_negative
 sce_obj_gamma_delta <- sce_obj[, sce_obj$signature_score > 0.7]
 ```
 
-We can then focus on just these gamma delta T cells and chain Bioconductor and tidyverse commands together to analyse.
+We can then focus on just these gamma delta T cells and chain
+Bioconductor and tidyverse commands together to analyse.
 
 ```{r warning=FALSE, message=FALSE}
 library(batchelor)
@@ -392,6 +393,61 @@ Using the `sce_obj`:
 2. There is a cluster of cells characterised by a low RNA output
    (nCount_RNA < 100). Identify the cell composition (cell_type) of
    that cluster. 
+
+# Part 2b Genomic and transcriptomic integration
+
+So far we have examined expression of genes across our cells, but we
+haven't considered the genomic location of the genes. In this section
+we will add genomic location information, and operate on this
+information using the *plyranges* package. This package provides tidy
+functionality to genomic ranges (*GRanges* objects) analogously to how
+*tidySingleCellExperiment* provides functionality for
+SingleCellExperiment objects.
+
+```{r message=FALSE}
+sce_obj |> rownames() |> head()
+
+library(EnsDb.Hsapiens.v86)
+edb <- EnsDb.Hsapiens.v86
+g <- ensembldb::genes(edb)
+
+g
+```
+
+```{r message=FALSE}
+library(plyranges)
+g <- g |>
+
+  select(symbol)
+
+gene_names <- sce_obj |> rownames()
+
+g <- g |>
+  filter(symbol %in% gene_names) |>
+  filter(!duplicated(symbol)) |>
+  sort()
+```
+
+```{r}
+sce_sub <- sce_obj[ g$symbol, ]
+
+names(g) <- g$symbol
+
+rowRanges(sce_sub) <- g
+
+# this could be done with plyranges instead...
+g$tile <- rep(1:5, c(100,100,100,100,47))
+
+g_mcols <- g |>
+  select(symbol, tile, .drop_ranges=TRUE) |>
+  as_tibble()
+
+sce_sub |>
+  join_features(features = head(gene_names)) |>
+  left_join(g_mcols, by = join_by(.feature == symbol)) |>
+  select(.cell, .feature, tile)
+  
+```
 
 # Part 3 Nested analyses
 
