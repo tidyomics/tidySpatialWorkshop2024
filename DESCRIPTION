@@ -37,6 +37,7 @@ Imports:
     batchelor,
     scater,
     purrr,
+    plyranges,
     ensembldb,
     EnsDb.Hsapiens.v86
 Suggests:
