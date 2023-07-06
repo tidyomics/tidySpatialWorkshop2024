@@ -1,13 +1,9 @@
-# tidyomicsWorkshop
+# tidyomicsWorkshopBioc2023
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
-[![.github/workflows/basic_checks.yaml](https://github.com/tidybiology/tidyomicsWorkshopBioc2023/workflows/.github/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidybiology/tidyomicsWorkshopBioc2023/actions) 	
+[![Check, build, and push image](https://github.com/tidybiology/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidybiology/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml)
 <!-- badges: end -->
-
-<p float="left">
-<img height="100" alt="tidybulk" src="inst/images/tidybulk.png"/>
-</p>
 
 ## Instructor names and contact information
 
