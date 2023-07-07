@@ -407,8 +407,7 @@ SingleCellExperiment objects.
 ```{r message=FALSE}
 sce_obj |> rownames() |> head()
 
-library(EnsDb.Hsapiens.v86)
-edb <- EnsDb.Hsapiens.v86
+edb <- EnsDb.Hsapiens.v86::EnsDb.Hsapiens.v86
 g <- ensembldb::genes(edb)
 
 g
@@ -426,27 +425,24 @@ g <- g |>
   filter(symbol %in% gene_names) |>
   filter(!duplicated(symbol)) |>
   sort()
+
+names(g) <- g$symbol
 ```
 
 ```{r}
 sce_sub <- sce_obj[ g$symbol, ]
-
-names(g) <- g$symbol
-
 rowRanges(sce_sub) <- g
+```
 
+```{r}
 # this could be done with plyranges instead...
-g$tile <- rep(1:5, c(100,100,100,100,47))
-
-g_mcols <- g |>
-  select(symbol, tile, .drop_ranges=TRUE) |>
-  as_tibble()
+rowRanges(sce_sub) <- rowRanges(sce_sub) |>
+  mutate(tile = rep(1:5, c(100,100,100,100,47)))
 
 sce_sub |>
-  join_features(features = head(gene_names)) |>
-  left_join(g_mcols, by = join_by(.feature == symbol)) |>
-  select(.cell, .feature, tile)
-  
+  join_features(features = head(gene_names))
+
+# how can I get `tile` from rowData(sce_sub) ? 
 ```
 
 # Part 3 Nested analyses
