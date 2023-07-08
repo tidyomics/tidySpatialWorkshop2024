@@ -430,7 +430,7 @@ names(g) <- g$symbol
 ```
 
 ```{r}
-sce_sub <- sce_obj[ g$symbol, ]
+sce_sub <- sce_obj[ names(g), ]
 rowRanges(sce_sub) <- g
 ```
 
@@ -439,10 +439,35 @@ rowRanges(sce_sub) <- g
 rowRanges(sce_sub) <- rowRanges(sce_sub) |>
   mutate(tile = rep(1:5, c(100,100,100,100,47)))
 
-sce_sub |>
-  join_features(features = head(gene_names))
+# clunky
+rr <- rowRanges(sce_sub) |>
+  select(symbol, tile, .drop_ranges=TRUE) |>
+  as_tibble() |>
+  rename(feature = symbol)
 
-# how can I get `tile` from rowData(sce_sub) ? 
+library(tidySummarizedExperiment)
+library(purrr)
+nested <- sce_sub |>
+  aggregate_cells(cell_type) |>
+  left_join(rr, by="feature") |>
+  nest(se = -tile)
+
+smry <- nested |>
+  mutate(summary = map(se, \(se) {
+    tibble(count_sum = colSums(assay(se)),                             
+           cell_type = se$cell_type)
+  })
+  ) |>
+  select(-se) |>
+  unnest(summary) |>
+  mutate(ct = substr(cell_type, 1, 8))
+
+library(forcats)
+smry |>
+  mutate(ct = fct_reorder(ct, count_sum, .fun=median)) |>
+  ggplot(aes(count_sum, ct)) +
+  geom_point() +
+  facet_wrap(~tile, labeller=label_both)
 ```
 
 # Part 3 Nested analyses
@@ -452,7 +477,7 @@ calculations on data subsets. For example, we might want to estimate
 difference in mRNA abundance between two condition for each cell
 type. 
 
-`tidyr` and `purrr` offer a great tool to perform iterativre analyses
+`tidyr` and `purrr` offer a great tool to perform iterative analyses
 in a functional way.
 
 We use tidyverse `nest` to group the data. The command below will

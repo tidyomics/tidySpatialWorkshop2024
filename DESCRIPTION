@@ -39,7 +39,8 @@ Imports:
     purrr,
     plyranges,
     ensembldb,
-    EnsDb.Hsapiens.v86
+    EnsDb.Hsapiens.v86,
+    forcats
 Suggests:
     knitr,
     rmarkdown,
