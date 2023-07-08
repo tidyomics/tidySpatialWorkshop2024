@@ -33,6 +33,7 @@ Imports:
     colorspace,
     dittoSeq,
     tidySingleCellExperiment,
+    tidySummarizedExperiment,
     scales,
     batchelor,
     scater,
