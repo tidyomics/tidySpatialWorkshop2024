@@ -1,6 +1,6 @@
 Package: tidyomicsWorkshopBioc2023
 Title: Tidy genomic and transcriptomic analyses 
-Version: 0.16.6
+Version: 0.16.7
 Authors@R: 
     c(
     person(given = "Stefano",

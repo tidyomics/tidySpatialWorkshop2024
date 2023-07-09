@@ -12,7 +12,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 ```
 
 ## Instructors
@@ -398,30 +398,69 @@ Using the `sce_obj`:
 
 So far we have examined expression of genes across our cells, but we
 haven't considered the genomic location of the genes. In this section
-we will add genomic location information, and operate on this
-information using the *plyranges* package. This package provides tidy
-functionality to genomic ranges (*GRanges* objects) analogously to how
-*tidySingleCellExperiment* provides functionality for
-SingleCellExperiment objects.
+we will operate on genomic location information using the *plyranges*
+package, and tie this to the transcriptomics data we have been examining.
+
+*plyranges* provides tidyverse-style functionality to genomic ranges
+(*GRanges* objects) analogously to how *tidySingleCellExperiment*
+provides functionality for SingleCellExperiment objects.
+
+In some pipelines (e.g. using *tximeta* to import bulk or single-cell
+quantification data) our SingleCellExperiment or SummarizedExperiment
+would already have genomic range information attached to the rows of
+the object. That is, we would have information about the start and end
+of each gene, their strand, the lengths of the chromosomes, the genome
+build, etc. Here we don't have range information yet, so we will first
+take some steps to add hg38 range information on our genes, matching
+by the gene symbol provided on the rows of `sce_obj`.
+
+```{r eval=FALSE}
+# delete later
+library(SingleCellExperiment)
+library(ggplot2)
+library(dplyr)
+library(tidySingleCellExperiment)
+sce_obj <- tidyomicsWorkshopBioc2023::sce_obj
+```
 
 ```{r message=FALSE}
+# what our rownames look like: gene symbols
 sce_obj |> rownames() |> head()
 
-edb <- EnsDb.Hsapiens.v86::EnsDb.Hsapiens.v86
+# recommend Ensembl or GENCODE gene annotations
+edb <- EnsDb.Hsapiens.v86::EnsDb.Hsapiens.v86 # hg38
 g <- ensembldb::genes(edb)
 
 g
+
+head(genome(g))
 ```
+
+We need to subset `g`, the human genes, to the ones in our
+SingleCellExperiment. While Ensembl IDs are unique, gene symbols are
+not, so we will have to also remove any duplicate gene symbols 
+(recommend working with Ensembl IDs as feature identifiers when
+possible).
+
+In this first chunk we subset the columns of `g` to just the `symbol`
+column, using the `select()` function.
 
 ```{r message=FALSE}
 library(plyranges)
 g <- g |>
 
   select(symbol)
+```
 
+Now we filter the genes to only those present as rownames of
+`sce_obj`, and remove duplicate IDs. We then sort by genomic location,
+and use the gene symbols are names of the ranges.
+
+```{r}
 gene_names <- sce_obj |> rownames()
 
 g <- g |>
+  
   filter(symbol %in% gene_names) |>
   filter(!duplicated(symbol)) |>
   sort()
@@ -429,45 +468,130 @@ g <- g |>
 names(g) <- g$symbol
 ```
 
+Now we can add our gene information to the rows of the
+`sce_obj`. Again, these following steps would not be necessary using a
+pipeline that imports quantification data to ranged objects, but it
+isn't too hard to add manually. If adding ranges manually, make note
+of the provenance of where you downloaded the information (Ensembl,
+GENCODE or otherwise), and assign a genome build if you plan on
+sharing the final object (e.g. with `genome(x) <- "..."`).
+
 ```{r}
 sce_sub <- sce_obj[ names(g), ]
 rowRanges(sce_sub) <- g
+sce_sub |> rowRanges() # peek at the ranges
+```
+
+Now let's do something interesting with the gene ranges: let's see if
+genes near peaks of active chromatin marks (H3K3me3) in PBMC have a
+difference in their expression level. There are many sources of
+epigenetic tracks, ENCODE, Roadmap, etc. Here we will use some ENCODE
+data available in *AnnotationHub* on Bioconductor. 
+
+We have to do a bit of book-keeping first. These peaks were in
+the hg19 genome build, so we have ran the following commands (here
+un-evaluated) to lift the peaks to hg38, and provide proper sequence
+information.
+
+```{r eval=FALSE}
+### un-evaluated code chunk ###
+# AnnotationHub contains many useful genome tracks
+library(AnnotationHub)
+ah <- AnnotationHub()
+# can be queried with keywords
+query(ah, c("Peripheral_Blood","h3k4me3"))
+# downloading a particular resource
+peaks <- ah[["AH44823"]]
+library(rtracklayer)
+# lifting hg19 to hg38
+new_peaks <- unlist(
+  liftOver(
+    peaks,
+    chain = import.chain("~/Downloads/hg19ToHg38.over.chain")
+  )
+)
+# Ensembl-style chrom names
+seqlevelsStyle(new_peaks) <- "NCBI"
+# bring over any missing chroms
+seqlevels(new_peaks) <- seqlevels(sce_sub)
+# bring over chrom lengths
+seqinfo(new_peaks) <- seqinfo(sce_sub)
+# subset to a few columns
+pbmc_h3k4me3_hg38 <- new_peaks |>
+  select(signalValue, qValue, peak)
+# save for reloading below
+save(pbmc_h3k4me3_hg38, file="data/pbmc_h3k4me3_hg38.rda", compress="xz")
+```
+
+Loading those previously generated peaks:
+
+```{r}
+peaks <- tidyomicsWorkshopBioc2023::pbmc_h3k4me3_hg38
 ```
 
 ```{r}
-# this could be done with plyranges instead...
-rowRanges(sce_sub) <- rowRanges(sce_sub) |>
-  mutate(tile = rep(1:5, c(100,100,100,100,47)))
+# hist(peaks$qValue)
+peaks <- peaks |>
+  slice(1:5000) |> # ordered already by p-value (most to least sig)
+  sort()
+```
 
-# clunky
-rr <- rowRanges(sce_sub) |>
-  select(symbol, tile, .drop_ranges=TRUE) |>
+```{r}
+dists <- rowRanges(sce_sub) |>
+
+  anchor_5p() |>
+  mutate(width=1) |>
+  add_nearest_distance(peaks)
+
+hist(log10(dists$distance + 1), breaks=40,
+     main="gene-to-peak distance", xlab="log10 distance")
+```
+
+```{r}
+bins <- c(0,1,1e4,1e5,Inf)
+
+dists <- dists |>
+  
+  select(symbol, distance, .drop_ranges = TRUE) |>
   as_tibble() |>
+  mutate(dist_bin = cut(distance, bins, include.lowest = TRUE)) |>
   rename(feature = symbol)
+```
 
+```{r}
+dists |>
+  ggplot(aes(dist_bin)) +
+  geom_bar()
+```
+
+```{r}
 library(tidySummarizedExperiment)
 library(purrr)
 nested <- sce_sub |>
   aggregate_cells(cell_type) |>
-  left_join(rr, by="feature") |>
-  nest(se = -tile)
+  left_join(dists, by="feature") |>
+  nest(se = -dist_bin)
+```
 
+```{r}
 smry <- nested |>
   mutate(summary = map(se, \(se) {
-    tibble(count_sum = colSums(assay(se)),                             
+    tibble(count_mean = colMeans(assay(se)),                             
            cell_type = se$cell_type)
   })
   ) |>
   select(-se) |>
   unnest(summary) |>
-  mutate(ct = substr(cell_type, 1, 8))
+  mutate(ct = substr(cell_type, 1, 13))
+```
 
+```{r}
 library(forcats)
 smry |>
-  mutate(ct = fct_reorder(ct, count_sum, .fun=median)) |>
-  ggplot(aes(count_sum, ct)) +
+  mutate(ct = fct_reorder(ct, count_mean, .fun=median)) |>
+  ggplot(aes(count_mean, ct, color=dist_bin, group=dist_bin)) +
   geom_point() +
-  facet_wrap(~tile, labeller=label_both)
+  geom_line(orientation="y")
 ```
 
 **Session Information**

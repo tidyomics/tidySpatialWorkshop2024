@@ -73,3 +73,12 @@
 #' @format theme
 #' @usage data(theme_multipanel)
 "theme_multipanel"
+
+#' pbmc_h3k4me3_hg38
+#' 
+#' A set of ChIP-seq peaks from ENCODE, downloaded from AnnotationHub
+#' in hg19 and lifted over to hg38. See vignette for details.
+#' 
+#' @format GRanges object
+#' @usage data(pbmc_h3k4me3_hg38)
+"pbmc_h3k4me3_hg38"
