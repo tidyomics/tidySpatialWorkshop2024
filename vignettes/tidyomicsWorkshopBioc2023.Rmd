@@ -526,6 +526,7 @@ save(pbmc_h3k4me3_hg38, file="data/pbmc_h3k4me3_hg38.rda", compress="xz")
 Loading those previously generated peaks:
 
 ```{r}
+# loading those H3K4me3 peaks for PBMCs
 peaks <- tidyomicsWorkshopBioc2023::pbmc_h3k4me3_hg38
 ```
 
@@ -592,6 +593,30 @@ smry |>
   ggplot(aes(count_mean, ct, color=dist_bin, group=dist_bin)) +
   geom_point() +
   geom_line(orientation="y")
+```
+
+```{r}
+overlaps <- rowRanges(sce_sub) |>
+ 
+  anchor_5p() |>
+  mutate(width=1) %>%
+  mutate(num_overlaps = count_overlaps(., peaks, maxgap=2e4))
+
+table(overlaps$num_overlaps)
+```
+
+```{r}
+library(nullranges)
+
+seg <- data.frame(seqnames=1, start=20e6, width=10e6) |>
+  as_granges()
+
+seg <- oneRegionSegment(seg, seqlength=seqlengths(peaks)[[1]])
+seg
+
+peaks |>
+  filter_by_overlaps(seg[2]) |>
+  bootRanges(blockLength=1e6, seg=seg, R=10)
 ```
 
 **Session Information**
