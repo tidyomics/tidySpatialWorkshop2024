@@ -12,7 +12,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 ## Instructors
@@ -394,25 +394,27 @@ Using the `sce_obj`:
    (nCount_RNA < 100). Identify the cell composition (cell_type) of
    that cluster. 
 
-# Part 3 Genomic and transcriptomic integration
+# Part 3 Genomic and transcriptomic data integration
 
 So far we have examined expression of genes across our cells, but we
 haven't considered the genomic location of the genes. In this section
 we will operate on genomic location information using the *plyranges*
-package, and tie this to the transcriptomics data we have been examining.
+package, and tie this to the single cell transcriptomics data we have
+been examining.
 
 *plyranges* provides tidyverse-style functionality to genomic ranges
-(*GRanges* objects) analogously to how *tidySingleCellExperiment*
+(GRanges objects) analogous to how *tidySingleCellExperiment*
 provides functionality for SingleCellExperiment objects.
 
 In some pipelines (e.g. using *tximeta* to import bulk or single-cell
 quantification data) our SingleCellExperiment or SummarizedExperiment
 would already have genomic range information attached to the rows of
-the object. That is, we would have information about the start and end
-of each gene, their strand, the lengths of the chromosomes, the genome
-build, etc. Here we don't have range information yet, so we will first
-take some steps to add hg38 range information on our genes, matching
-by the gene symbol provided on the rows of `sce_obj`.
+the object. That is, we would have information about the starts and ends
+of the genes, their strand information, even the lengths of the
+chromosomes and the genome build, etc. Here we don't have range
+information yet, so we will first take some steps to add hg38 range
+information on our genes, matching by the gene symbol provided on the
+rows of `sce_obj`. 
 
 ```{r eval=FALSE}
 # delete later
@@ -427,7 +429,7 @@ sce_obj <- tidyomicsWorkshopBioc2023::sce_obj
 # what our rownames look like: gene symbols
 sce_obj |> rownames() |> head()
 
-# recommend Ensembl or GENCODE gene annotations
+# we recommend Ensembl or GENCODE gene annotations
 edb <- EnsDb.Hsapiens.v86::EnsDb.Hsapiens.v86 # hg38
 g <- ensembldb::genes(edb)
 
@@ -443,7 +445,9 @@ not, so we will have to also remove any duplicate gene symbols
 possible).
 
 In this first chunk we subset the columns of `g` to just the `symbol`
-column, using the `select()` function.
+column, using the `select()` function. *plyranges* enables us to use
+familiar tidy verbs on GRanges objects, e.g. to `filter` rows
+or to `select` columns of metadata attached to the ranges.
 
 ```{r message=FALSE}
 library(plyranges)
@@ -452,9 +456,10 @@ g <- g |>
   select(symbol)
 ```
 
-Now we filter the genes to only those present as rownames of
-`sce_obj`, and remove duplicate IDs. We then sort by genomic location,
-and use the gene symbols are names of the ranges.
+Now we filter the genes of our SingleCellExperiment to only those
+present as rownames of `sce_obj`, and remove duplicate IDs. We then
+sort by genomic location, and use the gene symbols as names of the
+ranges.
 
 ```{r}
 gene_names <- sce_obj |> rownames()
@@ -463,7 +468,7 @@ g <- g |>
   
   filter(symbol %in% gene_names) |>
   filter(!duplicated(symbol)) |>
-  sort()
+  sort() # genomic position sorting
 
 names(g) <- g$symbol
 ```
@@ -477,21 +482,25 @@ GENCODE or otherwise), and assign a genome build if you plan on
 sharing the final object (e.g. with `genome(x) <- "..."`).
 
 ```{r}
-sce_sub <- sce_obj[ names(g), ]
-rowRanges(sce_sub) <- g
+all(names(g) %in% rownames(sce_obj)) 
+sce_sub <- sce_obj[ names(g), ] # put SCE in order of `g`
+rowRanges(sce_sub) <- g # assign ranges `g` to the SCE
 sce_sub |> rowRanges() # peek at the ranges
 ```
 
 Now let's do something interesting with the gene ranges: let's see if
-genes near peaks of active chromatin marks (H3K3me3) in PBMC have a
-difference in their expression level. There are many sources of
-epigenetic tracks, ENCODE, Roadmap, etc. Here we will use some ENCODE
-data available in *AnnotationHub* on Bioconductor. 
+genes near peaks of active chromatin marks (H3K4me3 measured with
+ChIP-seq) in another experiment involving PBMC have a difference in
+their expression level compared to other genes.
 
-We have to do a bit of book-keeping first. These peaks were in
+There are many sources of epigenetic tracks, ENCODE, Roadmap,
+etc. Here we will use some ENCODE data available in *AnnotationHub* on
+Bioconductor.
+
+We had to do a bit of book-keeping first. These peaks were in
 the hg19 genome build, so we have ran the following commands (here
-un-evaluated) to lift the peaks to hg38, and provide proper sequence
-information.
+un-evaluated) to 'lift" the peaks to the hg38 genome build, and
+provide proper sequence information.
 
 ```{r eval=FALSE}
 ### un-evaluated code chunk ###
@@ -523,19 +532,33 @@ pbmc_h3k4me3_hg38 <- new_peaks |>
 save(pbmc_h3k4me3_hg38, file="data/pbmc_h3k4me3_hg38.rda", compress="xz")
 ```
 
-Loading those previously generated peaks:
+Loading those peaks.
 
 ```{r}
 # loading those H3K4me3 peaks for PBMCs
 peaks <- tidyomicsWorkshopBioc2023::pbmc_h3k4me3_hg38
+plot(peaks$qValue, type="l", ylab="q-value", main="H3K4me3 peaks")
+abline(v=5000, lty=2)
 ```
 
+We will arbitrarily chose to take the top 5,000 peaks by p-value. How
+to chose the number of epigenetic peaks and genes to consider in a
+multi-omics analysis is a more involved question, and is worth
+considering the impact of such a choice for enrichment analysis.
+
 ```{r}
-# hist(peaks$qValue)
 peaks <- peaks |>
+  
   slice(1:5000) |> # ordered already by p-value (most to least sig)
-  sort()
+  sort() # genomic position sorting
 ```
+
+It is easy to compute the distance of the genes in our
+SingleCellExperiment to the nearest H3K4me3 peak, using *plyranges*
+convenience functions.
+
+See the [plyranges package website](addhere) for a full listing of
+such functions.
 
 ```{r}
 dists <- rowRanges(sce_sub) |>
@@ -548,34 +571,63 @@ hist(log10(dists$distance + 1), breaks=40,
      main="gene-to-peak distance", xlab="log10 distance")
 ```
 
+Let's put the genes into 4 different bins by their distance to a
+H3K4me3 peak: 1) overlapping [distance of 0], 2) 1-10kb, 3)
+10kb-100kb, or 4) farther than 100kb.
+
 ```{r}
 bins <- c(0,1,1e4,1e5,Inf)
 
 dists <- dists |>
   
-  select(symbol, distance, .drop_ranges = TRUE) |>
+  select(symbol, distance, .drop_ranges = TRUE) |> # remove chr/pos/strand etc.
   as_tibble() |>
   mutate(dist_bin = cut(distance, bins, include.lowest = TRUE)) |>
-  rename(feature = symbol)
+  rename(feature = symbol) # this will help us add information to the SCE
 ```
+
+We can see how many genes are in which category:
 
 ```{r}
 dists |>
+  
   ggplot(aes(dist_bin)) +
   geom_bar()
 ```
 
-```{r}
+We will now take the SingleCellExperiment data and compress it down to
+a SummarizedExperiment using the `aggregate_cells` function from
+*tidySingleCellExperiment*. After this function, every column of the
+SummarizedExperiment is a cell type.
+
+We immediately pipe the SummarizedExperiment into a `left_join` where
+we add the distance-to-peak information, and then into a `nest`
+command where we create a nested (tidy)SummarizedExperiment object,
+where we have grouped by the distance bin that the genes fall into.
+
+
+```{r message=FALSE}
 library(tidySummarizedExperiment)
 library(purrr)
 nested <- sce_sub |>
+  
   aggregate_cells(cell_type) |>
   left_join(dists, by="feature") |>
   nest(se = -dist_bin)
+
+nested
 ```
+
+We can now operate on the SummarizedExperiment objects that are within
+`nested`. For example, we can extract the column means of the counts
+(cell-type-specific means of counts over genes).
+
+We save this as a new tibble called `smry` as it contains summary
+information.
 
 ```{r}
 smry <- nested |>
+
   mutate(summary = map(se, \(se) {
     tibble(count_mean = colMeans(assay(se)),                             
            cell_type = se$cell_type)
@@ -586,14 +638,33 @@ smry <- nested |>
   mutate(ct = substr(cell_type, 1, 13))
 ```
 
+As a final plot, we can look at the mean count across the cell types,
+stratified by the distance-bin.
+
 ```{r}
 library(forcats)
 smry |>
+  
   mutate(ct = fct_reorder(ct, count_mean, .fun=median)) |>
   ggplot(aes(count_mean, ct, color=dist_bin, group=dist_bin)) +
   geom_point() +
   geom_line(orientation="y")
 ```
+
+We finish this section with a few notes about steps we took:
+
+1. calculated distances from genes to H3K4me3 peaks
+2. added distance information onto the SingleCellExperiment
+3. condensed the dataset via pseudobulking
+4. computed the mean count within 4 bins of genes
+5. visualized these mean counts over cell types and bins
+
+As an alternative to (1), we could have counted the number of peaks
+that were near each genes, or even computed on the metadata of the
+peaks (signal value, etc.).
+
+An example of how we could have counted overlaps instead (how many
+peaks within 20kb):
 
 ```{r}
 overlaps <- rowRanges(sce_sub) |>
@@ -605,18 +676,38 @@ overlaps <- rowRanges(sce_sub) |>
 table(overlaps$num_overlaps)
 ```
 
+Another question that often arises is whether the distances or
+overlaps we observe are more or less than we would expect if there
+were no relationship between the positions of genes and peaks.
+
+To answer questions like these, we have developed the *nullranges*
+package, which allows for either bootstrapping of ranges throughout
+the genome, or selection of a covariate-matched background set, to
+compute probabilities under the null hypothesis.
+
+A brief example of bootstrapping some of the peaks in a window of
+chr1:20Mb-30Mb (see *nullranges* website for more comprehensive
+examples).
+
 ```{r}
 library(nullranges)
 
+# make a small range for demonstration of bootstrapping
 seg <- data.frame(seqnames=1, start=20e6, width=10e6) |>
   as_granges()
 
+# generate a genome segmentation from this one range
 seg <- oneRegionSegment(seg, seqlength=seqlengths(peaks)[[1]])
 seg
 
+# bootstrap peaks within this segment (just for demo)
 peaks |>
   filter_by_overlaps(seg[2]) |>
   bootRanges(blockLength=1e6, seg=seg, R=10)
+
+# these bootstrapped ranges could then be used for computing
+# generic test statistics, with the `iter` column used for
+# building a null distribution
 ```
 
 **Session Information**
