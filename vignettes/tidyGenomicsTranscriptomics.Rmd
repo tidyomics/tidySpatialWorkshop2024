@@ -1,12 +1,13 @@
 ---
-title: "Tidy Transcriptomics for Single-cell RNA Sequencing Analyses with Bioconductor"
+title: "Tidy genomic and transcriptomic single-cell analyses"
 author:
   - Maria Doyle, Peter MacCallum Cancer Centre^[<maria.doyle at petermac.org>]
   - Stefano Mangiola, Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
+  - Michael Love, UNC-Chapel Hill^[<michaelisaiahlove at gmail.com>]
 output: rmarkdown::html_vignette
 bibliography: "`r file.path(system.file(package='tidyomicsWorkshopBioc2023', 'vignettes'), 'tidytranscriptomics.bib')`"
 vignette: >
-  %\VignetteIndexEntry{Tidy Transcriptomics for Single-cell RNA Sequencing Analyses with Bioconductor}
+  %\VignetteIndexEntry{Tidy genomic and transcriptomic single-cell analyses}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,21 +26,34 @@ focuses on prostate and breast tumour microenvironment, the
 development of statistical models for the analysis of RNA sequencing
 data, and data analysis and visualisation interfaces. 
 
+*Dr. Michael Love* is an Associate Professor at UNC-Chapel Hill in the
+Department of Genetics and the Department of Biostatistics. His
+background is in Statistics and Computational Biology. His research
+is highly collaborative, working with Geneticists, Molecular
+Biologists, Epidemiologists, and Computer Scientists on methods for
+transcriptomics, epigenetics, GWAS, and high-throughput functional
+screens.
+
 ## Workshop goals and objectives
 
 ### What you will learn
 
 -   Basic `tidy` operations possible with `tidySingleCellExperiment`
+    and `GRanges`
 -   How to interface `SingleCellExperiment` with tidy manipulation and
     visualisation 
 -   A real-world case study that will showcase the power of `tidy`
-    single-cell methods compared with base/ad-hoc methods 
+    single-cell methods compared with base/ad-hoc methods
+-   Examples of how to integrate genomic and transcriptomic data
+    (ChIP-seq and RNA-seq)
 
 ### What you will *not* learn
 
 -   The molecular technology of single-cell sequencing
 -   The fundamentals of single-cell data analysis
 -   The fundamentals of tidy data analysis
+-   Detailed data integration methods (multi-view or multi-omics
+    algorithms)
 
 ## Getting started
 
@@ -53,20 +67,13 @@ install on your own computer, see instructions
 Alternatively, you can view the material at the workshop webpage 
 [here](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/articles/main.html).
 
-## Introduction to tidytranscriptomics
+## Introduction slides
 
-[Here](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf)
+We provide two links to introductory material (to consult outside of
+the workshop slot):
 
-<!--
-
-<iframe 
-src="https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf&embedded=true" 
-scrolling="yes" 
-style="width:100%; height:600px;" 
-frameborder="0">
-</iframe>
-
--->
+1. [Introduction to tidytranscriptomics](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf)
+2. [Introduction to tidy genomics](https://github.com/tidybiology/tidy-genomics-talk/blob/main/tidy-genomics-talk.pdf)
 
 # Part 1 Introduction to tidySingleCellExperiment
 
@@ -150,6 +157,15 @@ We can use `filter` to choose rows, for example, to see just the rows for the ce
 ```{r}
 sce_obj |> filter(Phase == "G1")
 ```
+
+:::: {.note}
+Note that *rows* in this context refers to rows of the abstraction,
+not *rows* of the SingleCellExperiment which correspond to
+genes. *tidySingleCellExperiment* prioritizes cells as the units of
+observation in the abstraction, while the full dataset, including
+measurements of expression of all genes, is still available "in the
+background".
+::::
 
 We can use `select` to view columns, for example, to see the filename,
 total cellular RNA abundance and cell phase. 
@@ -406,24 +422,18 @@ been examining.
 (GRanges objects) analogous to how *tidySingleCellExperiment*
 provides functionality for SingleCellExperiment objects.
 
+:::: {.note}
 In some pipelines (e.g. using *tximeta* to import bulk or single-cell
 quantification data) our SingleCellExperiment or SummarizedExperiment
 would already have genomic range information attached to the rows of
 the object. That is, we would have information about the starts and ends
 of the genes, their strand information, even the lengths of the
-chromosomes and the genome build, etc. Here we don't have range
-information yet, so we will first take some steps to add hg38 range
-information on our genes, matching by the gene symbol provided on the
-rows of `sce_obj`. 
+chromosomes and the genome build, etc. 
+::::
 
-```{r eval=FALSE}
-# delete later
-library(SingleCellExperiment)
-library(ggplot2)
-library(dplyr)
-library(tidySingleCellExperiment)
-sce_obj <- tidyomicsWorkshopBioc2023::sce_obj
-```
+Before we start our integrative analysis, we will first take some
+steps to add hg38 range information on our genes, matching by the gene
+symbol provided on the rows of `sce_obj`:
 
 ```{r message=FALSE}
 # what our rownames look like: gene symbols
@@ -474,12 +484,16 @@ names(g) <- g$symbol
 ```
 
 Now we can add our gene information to the rows of the
-`sce_obj`. Again, these following steps would not be necessary using a
+`sce_obj`. 
+
+:::: {.note}
+Again, these following steps would not be necessary using a
 pipeline that imports quantification data to ranged objects, but it
 isn't too hard to add manually. If adding ranges manually, make note
 of the provenance of where you downloaded the information (Ensembl,
 GENCODE or otherwise), and assign a genome build if you plan on
 sharing the final object (e.g. with `genome(x) <- "..."`).
+::::
 
 ```{r}
 all(names(g) %in% rownames(sce_obj)) 
@@ -497,10 +511,12 @@ There are many sources of epigenetic tracks, ENCODE, Roadmap,
 etc. Here we will use some ENCODE data available in *AnnotationHub* on
 Bioconductor.
 
+:::: {.note}
 We had to do a bit of book-keeping first. These peaks were in
 the hg19 genome build, so we have ran the following commands (here
 un-evaluated) to 'lift" the peaks to the hg38 genome build, and
 provide proper sequence information.
+::::
 
 ```{r eval=FALSE}
 ### un-evaluated code chunk ###
@@ -557,8 +573,9 @@ It is easy to compute the distance of the genes in our
 SingleCellExperiment to the nearest H3K4me3 peak, using *plyranges*
 convenience functions.
 
-See the [plyranges package website](addhere) for a full listing of
-such functions.
+See the 
+[plyranges package website](https://sa-lee.github.io/plyranges/reference/index.html) 
+for a full listing of such functions.
 
 ```{r}
 dists <- rowRanges(sce_sub) |>
@@ -582,7 +599,7 @@ dists <- dists |>
   
   select(symbol, distance, .drop_ranges = TRUE) |> # remove chr/pos/strand etc.
   as_tibble() |>
-  mutate(dist_bin = cut(distance, bins, include.lowest = TRUE)) |>
+  mutate(distance_bin = cut(distance, bins, include.lowest = TRUE)) |>
   rename(feature = symbol) # this will help us add information to the SCE
 ```
 
@@ -591,7 +608,7 @@ We can see how many genes are in which category:
 ```{r}
 dists |>
   
-  ggplot(aes(dist_bin)) +
+  ggplot(aes(distance_bin)) +
   geom_bar()
 ```
 
@@ -613,7 +630,7 @@ nested <- sce_sub |>
   
   aggregate_cells(cell_type) |>
   left_join(dists, by="feature") |>
-  nest(se = -dist_bin)
+  nest(se = -distance_bin)
 
 nested
 ```
@@ -635,20 +652,24 @@ smry <- nested |>
   ) |>
   select(-se) |>
   unnest(summary) |>
-  mutate(ct = substr(cell_type, 1, 13))
+  mutate(cell = substr(cell_type, 1, 13)) # abbreviate cell_type for plot
 ```
 
-As a final plot, we can look at the mean count across the cell types,
-stratified by the distance-bin.
+As a final plot, we can look at the mean count over the genes in a
+particular distance bin (x-axis), across the cell types (y-axis). The
+different lines show how the genes' proximity to H3K4me3 peaks affects
+the average count.
 
 ```{r}
 library(forcats)
 smry |>
   
-  mutate(ct = fct_reorder(ct, count_mean, .fun=median)) |>
-  ggplot(aes(count_mean, ct, color=dist_bin, group=dist_bin)) +
+  mutate(cell = fct_reorder(cell, count_mean, .fun=median)) |>
+  ggplot(aes(count_mean, cell, color=distance_bin, group=distance_bin)) +
   geom_point() +
-  geom_line(orientation="y")
+  geom_line(orientation="y") +
+  xlab("mean of count over genes in bin") +
+  ylab("cell type")
 ```
 
 We finish this section with a few notes about steps we took:
@@ -659,12 +680,12 @@ We finish this section with a few notes about steps we took:
 4. computed the mean count within 4 bins of genes
 5. visualized these mean counts over cell types and bins
 
+:::: {.note}
 As an alternative to (1), we could have counted the number of peaks
 that were near each genes, or even computed on the metadata of the
-peaks (signal value, etc.).
-
-An example of how we could have counted overlaps instead (how many
-peaks within 20kb):
+peaks (signal value, etc.). An example follows of how we could have
+counted overlaps instead (how many peaks within 20kb).
+::::
 
 ```{r}
 overlaps <- rowRanges(sce_sub) |>
@@ -676,18 +697,18 @@ overlaps <- rowRanges(sce_sub) |>
 table(overlaps$num_overlaps)
 ```
 
+:::: {.note}
 Another question that often arises is whether the distances or
 overlaps we observe are more or less than we would expect if there
 were no relationship between the positions of genes and peaks.
-
 To answer questions like these, we have developed the *nullranges*
 package, which allows for either bootstrapping of ranges throughout
 the genome, or selection of a covariate-matched background set, to
 compute probabilities under the null hypothesis.
-
-A brief example of bootstrapping some of the peaks in a window of
-chr1:20Mb-30Mb (see *nullranges* website for more comprehensive
+A brief example follows of bootstrapping some of the peaks in a window
+of chr1:20Mb-30Mb (see *nullranges* website for more comprehensive
 examples).
+::::
 
 ```{r}
 library(nullranges)
@@ -717,3 +738,13 @@ sessionInfo()
 ```
 
 **References**
+
+```{css echo=FALSE}
+.note {
+  margin: 30px;
+  padding: 1em;
+  background: #FFF8F0;
+  border: 1px solid #EFE8E0;
+  border-radius: 10px;
+}
+```
