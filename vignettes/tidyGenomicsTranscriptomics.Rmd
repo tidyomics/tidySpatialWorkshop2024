@@ -87,14 +87,15 @@ library(colorspace)
 library(dittoSeq)
 ```
 
-SingleCellExperiment is a very popular analysis toolkit for single
-cell RNA sequencing data [@butler2018integrating;
-@stuart2019comprehensive]. 
+SingleCellExperiment is a popular data object in the Bioconductor
+ecosystem for representing single-cell datasets, which works
+seamlessly with numerous Bioconductor packages and methods written by
+different groups [@Amezquita2020]. It can easily be converted to and
+from other formats such as SeuratObject and scverse's AnnData.
 
 Here we load single-cell data in SingleCellExperiment object
 format. This data is peripheral blood mononuclear cells (PBMCs) from
 metastatic breast cancer patients.
-
 
 ```{r}
 # load single cell RNA sequencing data
@@ -422,10 +423,10 @@ we will operate on genomic location information using the *plyranges*
 data we have been examining.
 
 *plyranges* provides tidyverse-style functionality to genomic ranges
-(GRanges objects) analogous to how *tidySingleCellExperiment*
-provides functionality for SingleCellExperiment objects. For an
-example of a workflow using *plyranges* as part of a bulk RNA-seq
-analysis, see @Lee2020.
+(GRanges objects [@Lawrence2013]) analogous to how
+*tidySingleCellExperiment* provides functionality for
+SingleCellExperiment objects. For an example of a workflow using
+*plyranges* as part of a bulk RNA-seq analysis, see @Lee2020.
 
 :::: {.note}
 In some pipelines (e.g. using *tximeta* [@Love2020] to import bulk or
@@ -438,7 +439,9 @@ the lengths of the chromosomes and the genome build, etc.
 
 Before we start our integrative analysis, we will first take some
 steps to add hg38 range information on our genes, matching by the gene
-symbol provided on the rows of `sce_obj`:
+symbol provided on the rows of `sce_obj`. We add genes from the
+*ensembldb* package [@Rainer2019] (to see how to add a particular
+version of Ensembl, see the package vignette).
 
 ```{r message=FALSE}
 # what our rownames look like: gene symbols
@@ -518,8 +521,8 @@ ChIP-seq) in another experiment involving PBMC have a difference in
 their expression level compared to other genes.
 
 There are many sources of epigenetic tracks, ENCODE, Roadmap,
-etc. Here we will use some ENCODE data available in *AnnotationHub* on
-Bioconductor.
+etc. Here we will use some ENCODE [@ENCODE2012] data available in
+*AnnotationHub* on Bioconductor.
 
 :::: {.note}
 We had to do a bit of book-keeping first. These peaks were in
