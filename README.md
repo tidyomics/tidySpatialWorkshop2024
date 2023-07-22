@@ -7,8 +7,8 @@
 
 ## Instructor names and contact information
 
-* Michael Love <michaelisaiahlove at gmail.com>
 * Stefano Mangiola <mangiola.s at wehi.edu.au>
+* Michael Love <michaelisaiahlove at gmail.com>
 
 ## Syllabus
 
@@ -29,12 +29,12 @@ remotes::install_github("tidybiology/tidyomicsWorkshopBioc2023", build_vignettes
 
 # To view vignette
 library(tidyomicsWorkshopBioc2023)
-vignette("tidyomicsWorkshopBioc2023")
+vignette("tidyGenomicsTranscriptomics")
 ```
 
 To run the code, you could then copy and paste the code from the
 workshop vignette or 
-[R markdown file](https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/vignettes/tidyomicsWorkshopBioc2023.Rmd)
+[R markdown file](https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/vignettes/tidyGenomicsTranscriptomics.Rmd)
 into a new R Markdown file on your computer. 
 
 ## Workshop Description
@@ -45,7 +45,7 @@ paradigm provides a standard way to organise data values within a
 dataset, where each variable is a column, each observation is a row,
 and data is manipulated using an easy-to-understand vocabulary. Most
 importantly, the data structure remains consistent across manipulation
-and analysis functions. 
+and analysis functions.
 
 This can be achieved with the integration of packages present in the R
 CRAN and Bioconductor ecosystem, including
@@ -57,11 +57,18 @@ RNA sequencing data representation and analysis. For more information
 see the [tidy transcriptomics
 blog](https://stemangiola.github.io/tidytranscriptomics/). 
 
+In addition this workshop will finish with examples of how genomic and
+transcriptomic data can be combined, e.g. ChIP-seq and scRNA-seq, also
+using tidy data paradigms for genomic ranges. This is enabled with the 
+[plyranges](https://sa-lee.github.io/plyranges/) package,
+with further information provided in the 
+[tidy-ranges-tutorial](https://tidybiology.github.io/tidy-ranges-tutorial/).
+
 ### Pre-requisites
 
 * Basic familiarity with single cell transcriptomic analyses
 * Basic familiarity with tidyverse
-
+* Basic familiarity with genomic ranges
 
 ### Workshop Participation
 
@@ -71,39 +78,38 @@ demos, exercises and Q&A.
 ### _R_ / _Bioconductor_ packages used
 
 * tidySingleCellExperiment
+* plyranges
 
 ### Workshop goals and objectives
 
-In exploring and analysing RNA sequencing data, there are a number of
-key concepts, such as filtering, scaling, dimensionality reduction,
-hypothesis testing, clustering and visualisation, that need to be
-understood. These concepts can be intuitively explained to new users,
-however, (i) the use of a heterogeneous vocabulary and jargon by
-methodologies/algorithms/packages, (ii) the complexity of data
-wrangling, and (iii) the coding burden, impede effective learning of
-the statistics and biology underlying an informed RNA sequencing
-analysis. 
-
-The tidytranscriptomics approach to RNA sequencing data analysis
-abstracts out the coding-related complexity and provides tools that
-use an intuitive and jargon-free vocabulary, enabling focus on the
-statistical and biological challenges. 
+The tidytranscriptomics approach to single-cell RNA sequencing data
+analysis abstracts out the coding-related complexity and provides
+tools that use an intuitive and jargon-free vocabulary, enabling focus
+on the statistical and biological challenges.
 
 #### Learning goals
 
 * To approach data representation and analysis though a tidy data
-  paradigm, integrating tidyverse with tidyseurat,
-  tidySingleCellExperiment and tidyHeatmap. 
+  paradigm, integrating tidyverse with the SingleCellExperiment data
+  object.
+* To explore integration of genomic and transcriptomic data also using
+  a tidy data paradigm.
 
 #### What you will learn
 
-* Basic tidy operations possible with tidyseurat and tidySingleCellExperiment
-* The differences between Seurat and SingleCellExperiment representation, and tidy representation
-* How to interface Seurat and SingleCellExperiment with tidy manipulation and visualisation
-* A real-world case study that will showcase the power of tidy single-cell methods compared with base/ad-hoc methods
+-   Basic `tidy` operations possible with `tidySingleCellExperiment`
+    and `GRanges`
+-   How to interface `SingleCellExperiment` with tidy manipulation and
+    visualisation 
+-   A real-world case study that will showcase the power of `tidy`
+    single-cell methods compared with base/ad-hoc methods
+-   Examples of how to integrate genomic and transcriptomic data
+    (ChIP-seq and RNA-seq)
 
-#### What you will not learn
+#### What you will *not* learn
 
-* The molecular technology of single-cell sequencing
-* The fundamentals of single-cell data analysis
-* The fundamentals of tidy data analysis
+-   The molecular technology of single-cell sequencing
+-   The fundamentals of single-cell data analysis
+-   The fundamentals of tidy data analysis
+-   Detailed data integration methods (multi-view or multi-omics
+    algorithms)

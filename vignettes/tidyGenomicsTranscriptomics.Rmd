@@ -442,28 +442,33 @@ sce_obj |> rownames() |> head()
 # we recommend Ensembl or GENCODE gene annotations
 edb <- EnsDb.Hsapiens.v86::EnsDb.Hsapiens.v86 # hg38
 g <- ensembldb::genes(edb)
-
-g
-
 head(genome(g))
 ```
 
-We need to subset `g`, the human genes, to the ones in our
+We can examine the first three genes and their metadata:
+
+```{r message=FALSE}
+library(plyranges)
+g |> slice(1:3)
+```
+
+Our first task is to subset `g`, the human genes, to the ones in our
 SingleCellExperiment. While Ensembl IDs are unique, gene symbols are
 not, so we will have to also remove any duplicate gene symbols 
 (recommend working with Ensembl IDs as feature identifiers when
 possible).
 
-In this first chunk we subset the columns of `g` to just the `symbol`
-column, using the `select()` function. *plyranges* enables us to use
-familiar tidy verbs on GRanges objects, e.g. to `filter` rows
-or to `select` columns of metadata attached to the ranges.
+We subset the columns of `g` to just the `symbol` column, using the
+`select()` function. *plyranges* enables us to use familiar tidy verbs
+on GRanges objects, e.g. to `filter` rows or to `select` columns of
+metadata attached to the ranges.
 
-```{r message=FALSE}
-library(plyranges)
+```{r}
 g <- g |>
 
   select(symbol)
+
+g |> slice(1:3)
 ```
 
 Now we filter the genes of our SingleCellExperiment to only those
@@ -580,8 +585,8 @@ for a full listing of such functions.
 ```{r}
 dists <- rowRanges(sce_sub) |>
 
-  anchor_5p() |>
-  mutate(width=1) |>
+  anchor_5p() |> # anchor 5 prime end
+  mutate(width=1) |> # shrink range to 1bp
   add_nearest_distance(peaks)
 
 hist(log10(dists$distance + 1), breaks=40,
@@ -672,13 +677,28 @@ smry |>
   ylab("cell type")
 ```
 
-We finish this section with a few notes about steps we took:
+We finish this section with a re-cap of the steps we took:
 
 1. calculated distances from genes to H3K4me3 peaks
 2. added distance information onto the SingleCellExperiment
 3. condensed the dataset via pseudobulking
-4. computed the mean count within 4 bins of genes
-5. visualized these mean counts over cell types and bins
+4. computed the mean count (over genes) within 4 bins of genes
+5. visualized these mean counts over cell types
+
+Let's consider a number of issues with this first-pass analysis and
+visualization:
+
+1. we arbitrarily thresholded the peaks at the beginning of the
+   analysis to take the top 5,000
+2. we just computed the mean count, not taking into account total
+   reads per cell type (sequencing depth per cell x number of cells) 
+3. we are comparing cell-type-specific expression to aggregate
+   ChIP-seq peaks in PBMC
+4. the two experiments, while both PBMC, come from different projects,
+   different labs, and one is from cancer patients, while the other is
+   from the ENCODE project
+5. we only plot the mean count over genes, perhaps it would be better
+   to show more information about the distribution
 
 :::: {.note}
 As an alternative to (1), we could have counted the number of peaks
