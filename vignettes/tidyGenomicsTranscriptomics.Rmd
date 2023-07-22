@@ -5,7 +5,7 @@ author:
   - Stefano Mangiola, Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
   - Michael Love, UNC-Chapel Hill^[<michaelisaiahlove at gmail.com>]
 output: rmarkdown::html_vignette
-bibliography: "`r file.path(system.file(package='tidyomicsWorkshopBioc2023', 'vignettes'), 'tidytranscriptomics.bib')`"
+bibliography: "`r file.path(system.file(package='tidyomicsWorkshopBioc2023', 'vignettes'), 'tidyomics.bib')`"
 vignette: >
   %\VignetteIndexEntry{Tidy genomic and transcriptomic single-cell analyses}
   %\VignetteEngine{knitr::rmarkdown}
@@ -109,7 +109,10 @@ SingleCellExperiment single-cell package and the tidyverse
 [@wickham2019welcome]. It creates an invisible layer that enables
 viewing the SingleCellExperiment object as a tidyverse tibble, and
 provides SingleCellExperiment-compatible *dplyr*, *tidyr*, *ggplot*
-and *plotly* functions. 
+and *plotly* functions.
+
+For related work for bulk RNA-seq, see the 
+[tidybulk](https://stemangiola.github.io/tidybulk/) package [@Mangiola2021].
 
 If we load the *tidySingleCellExperiment* package and then view the
 single cell data, it now displays as a tibble. 
@@ -415,20 +418,22 @@ Using the `sce_obj`:
 So far we have examined expression of genes across our cells, but we
 haven't considered the genomic location of the genes. In this section
 we will operate on genomic location information using the *plyranges*
-package, and tie this to the single cell transcriptomics data we have
-been examining.
+[@Lee2019] package, and tie this to the single cell transcriptomics
+data we have been examining.
 
 *plyranges* provides tidyverse-style functionality to genomic ranges
 (GRanges objects) analogous to how *tidySingleCellExperiment*
-provides functionality for SingleCellExperiment objects.
+provides functionality for SingleCellExperiment objects. For an
+example of a workflow using *plyranges* as part of a bulk RNA-seq
+analysis, see @Lee2020.
 
 :::: {.note}
-In some pipelines (e.g. using *tximeta* to import bulk or single-cell
-quantification data) our SingleCellExperiment or SummarizedExperiment
-would already have genomic range information attached to the rows of
-the object. That is, we would have information about the starts and ends
-of the genes, their strand information, even the lengths of the
-chromosomes and the genome build, etc. 
+In some pipelines (e.g. using *tximeta* [@Love2020] to import bulk or
+single-cell quantification data) our SingleCellExperiment or
+SummarizedExperiment would already have genomic range information
+attached to the rows of the object. That is, we would have information
+about the starts and ends of the genes, their strand information, even
+the lengths of the chromosomes and the genome build, etc.
 ::::
 
 Before we start our integrative analysis, we will first take some
@@ -594,8 +599,8 @@ hist(log10(dists$distance + 1), breaks=40,
 ```
 
 Let's put the genes into 4 different bins by their distance to a
-H3K4me3 peak: 1) overlapping [distance of 0], 2) 1-10kb, 3)
-10kb-100kb, or 4) farther than 100kb.
+H3K4me3 peak: 1) overlapping [distance of 0], 2) 1bp-10kb, 
+3) 10kb-100kb, or 4) farther than 100kb.
 
 ```{r}
 bins <- c(0,1,1e4,1e5,Inf)
@@ -723,8 +728,8 @@ overlaps we observe are more or less than we would expect if there
 were no relationship between the positions of genes and peaks.
 To answer questions like these, we have developed the *nullranges*
 package, which allows for either bootstrapping of ranges throughout
-the genome, or selection of a covariate-matched background set, to
-compute probabilities under the null hypothesis.
+the genome [@Mu2023], or selection of a covariate-matched background
+set [@Davis2023], to  compute probabilities under the null hypothesis.
 A brief example follows of bootstrapping some of the peaks in a window
 of chr1:20Mb-30Mb (see *nullranges* website for more comprehensive
 examples).
