@@ -16,9 +16,19 @@ Material [web page](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/).
 
 More details on the workshop are below.
 
+## Conference Galaxy platform
+
+You can find the workshop on the [BioC2023 Galaxy platform](https://workshop.bioconductor.org/) listed as:
+
+* **Package Demo: tidySingleCellExperiment** showing tidy genomic and transcriptomic analyses, for a single-cell RNA-seq application
+
+Click [here](https://bioc2023.bioconductor.org/workshops/) for a full list of the BioC2023 workshop demos.
+
 ## Workshop package installation 
 
-If you want to install the packages and material post-workshop, the instructions are below. The workshop is designed for R `4.3` and Bioconductor 3.17.
+If you want to install the packages and material post-workshop, the
+instructions are below. The workshop is designed for R `4.3` and
+Bioconductor 3.17. 
 
 ```
 #install.packages('remotes')
