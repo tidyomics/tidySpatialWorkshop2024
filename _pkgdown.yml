@@ -1,4 +1,4 @@
-url: https://tidybiology.github.io/tidyomicsWorkshopBioc2023
+url: https://tidyomics.github.io/tidyomicsWorkshopBioc2023
 
 template:
   params:
@@ -12,4 +12,4 @@ home:
 navbar:
   right:
    - icon: fa-github
-     href: https://github.com/tidybiology/tidyomicsWorkshopBioc2023
+     href: https://github.com/tidyomics/tidyomicsWorkshopBioc2023

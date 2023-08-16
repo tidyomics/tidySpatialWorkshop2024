@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
-[![Check, build, and push image](https://github.com/tidybiology/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidybiology/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml)
+[![Check, build, and push image](https://github.com/tidyomics/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml)
 <!-- badges: end -->
 
 ## Instructor names and contact information
@@ -12,7 +12,7 @@
 
 ## Syllabus
 
-Material [web page](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/).
+Material [web page](https://tidyomics.github.io/tidyomicsWorkshopBioc2023/).
 
 More details on the workshop are below.
 
@@ -35,7 +35,7 @@ Bioconductor 3.17.
           
 # Install workshop package
 
-remotes::install_github("tidybiology/tidyomicsWorkshopBioc2023", build_vignettes = TRUE)
+remotes::install_github("tidyomics/tidyomicsWorkshopBioc2023", build_vignettes = TRUE)
 
 # To view vignette
 library(tidyomicsWorkshopBioc2023)
@@ -44,7 +44,7 @@ vignette("tidyGenomicsTranscriptomics")
 
 To run the code, you could then copy and paste the code from the
 workshop vignette or 
-[R markdown file](https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/vignettes/tidyGenomicsTranscriptomics.Rmd)
+[R markdown file](https://raw.githubusercontent.com/tidyomics/tidyomicsWorkshopBioc2023/master/vignettes/tidyGenomicsTranscriptomics.Rmd)
 into a new R Markdown file on your computer. 
 
 ## Workshop Description
@@ -72,7 +72,7 @@ transcriptomic data can be combined, e.g. ChIP-seq and scRNA-seq, also
 using tidy data paradigms for genomic ranges. This is enabled with the 
 [plyranges](https://sa-lee.github.io/plyranges/) package,
 with further information provided in the 
-[tidy-ranges-tutorial](https://tidybiology.github.io/tidy-ranges-tutorial/).
+[tidy-ranges-tutorial](https://tidyomics.github.io/tidy-ranges-tutorial/).
 
 ### Pre-requisites
 

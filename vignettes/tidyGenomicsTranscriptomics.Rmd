@@ -62,18 +62,18 @@ screens.
 We will use the Cloud during the workshop and this method is available
 if you want to run the material after the workshop. If you want to
 install on your own computer, see instructions 
-[here](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/index.html#workshop-package-installation).
+[here](https://tidyomics.github.io/tidyomicsWorkshopBioc2023/index.html#workshop-package-installation).
 
 Alternatively, you can view the material at the workshop webpage 
-[here](https://tidybiology.github.io/tidyomicsWorkshopBioc2023/articles/main.html).
+[here](https://tidyomics.github.io/tidyomicsWorkshopBioc2023/articles/main.html).
 
 ## Introduction slides
 
 We provide two links to introductory material (to consult outside of
 the workshop slot):
 
-1. [Introduction to tidytranscriptomics](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidybiology/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf)
-2. [Introduction to tidy genomics](https://github.com/tidybiology/tidy-genomics-talk/blob/main/tidy-genomics-talk.pdf)
+1. [Introduction to tidytranscriptomics](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidyomics/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf)
+2. [Introduction to tidy genomics](https://github.com/tidyomics/tidy-genomics-talk/blob/main/tidy-genomics-talk.pdf)
 
 # Part 1 Introduction to tidySingleCellExperiment
 
