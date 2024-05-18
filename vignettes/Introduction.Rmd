@@ -1,0 +1,92 @@
+---
+title: "Introduction to Spatial omic analyses"
+author:
+  - Stefano Mangiola, South Australian immunoGENomics Cancer Institute^[<mangiola.stefano@adelaide.edu.au>], Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
+  - Luciano Martellotto, Adelaide Centre for Epigenetics, South Australian immunoGENomics Cancer Institute^[<luciano.martelotto@adelaide.edu.au>]
+output: rmarkdown::html_vignette
+# bibliography: "`r file.path(system.file(package='spatial_omics_workshop_2024', 'bibliography'), 'bibliography.bib')`"
+vignette: >
+  %\VignetteIndexEntry{Introduction to Spatial omic analyses}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+```
+
+## Instructors
+
+**Dr. Stefano Mangiola** is leading the Computational Cancer immunology group at the South Australian immunoGENomics Cancer Institute (SAiGENCI). He uses single-cell and spatial technologies to investigate the tumor microenvironment and the immune system. Beyong data production, his focus in on the integration and modelling of large-scale single-cell data resources. He is the author of `tidytranscriptiomics` and co-leads the `tidyomics` endevour. 
+
+
+**Dr. Luciano Martelotto** is a key figure in the field of spatial omics technology. He was previously the Scientific Director at the Single Cell Core facility at Harvard University, where he demonstrated his extensive expertise and significant contributions to the fields of single cell and spatial omics technology. Currently, he heads the Martelotto Lab located at the Adelaide Centre for Epigenetics and the South Australian immunoGENomics Cancer Institute (SAiGENCI). His lab is dedicated to the development and evaluation of new tools and methodologies for single cell and spatial omics, serving as an important incubator for innovation in these technologies. The lab engages in global collaborations and provides comprehensive support from the conceptual stage through to the analysis and delivery of results.
+
+## Workshop goals and objectives
+
+### What you will learn
+
+-   The basics of spatial profiling technologies
+-   Analysis and manipulation of sequencing-based spatial data.
+-   The basics of tidy R analyses of biological data with `tidyomics`
+-   How to interface `SpatialExperiment` with tidy R manipulation and visualisation
+-   Analysis and manipulation of imaging-based spatial data.
+
+## Getting started
+
+### Local
+
+You can view the material at the workshop webpage
+
+[here](https://tidyomics.github.io/spatialOmicsWorkshop2024/articles/main.html).
+
+### Installation
+
+```{r, eval=FALSE}
+
+```
+
+# Session 1: Introduction to Spatial Omics
+
+### Objective
+
+Provide a foundational understanding of spatial omics, covering different technologies and the distinctions between imaging and
+sequencing in experimental and analytical contexts.
+
+### Workshop Structure
+
+#### 1. Welcome and Introduction
+
+-   Overview of the workshop.
+-   Goals for Day 1.
+
+#### 2. What is Spatial Omics?
+
+-   Definition and significance in modern biology.
+-   Key applications and impact.
+
+#### 3. Technologies in Spatial Omics
+
+-   Overview of different spatial omics technologies.
+-   Comparison of imaging-based vs sequencing-based approaches.
+
+#### 4. Sequencing Spatial Omics
+
+-   Detailed comparison of methodologies.
+-   Experimental design considerations.
+-   Data analysis challenges and solutions.
+
+#### 5. Overview of Analysis Frameworks
+
+-   Introduction to various analysis frameworks.
+-   Brief mention of 'tidy' data principles in spatial omics.
+
+#### 6. Wrap-Up and Q&A
+
+-   Summarize key takeaways.
+-   Open floor for questions and discussions.
+
+

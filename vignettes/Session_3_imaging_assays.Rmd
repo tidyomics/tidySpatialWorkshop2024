@@ -1,0 +1,427 @@
+---
+title: "Imaging assays (tidy)"
+author:
+  - Stefano Mangiola, South Australian immunoGENomics Cancer Institute^[<mangiola.stefano@adelaide.edu.au>], Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
+  - Luciano Martellotto, Adelaide Centre for Epigenetics, South Australian immunoGENomics Cancer Institute^[<luciano.martelotto@adelaide.edu.au>]
+output: rmarkdown::html_vignette
+# bibliography: "`r file.path(system.file(package='spatialOmicsWorkshop2024', 'vignettes'), 'tidyomics.bib')`"
+vignette: >
+  %\VignetteIndexEntry{Imaging assays (tidy)}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+```
+
+# Session 3 – Spatial analyses of imaging data
+
+### 1. Working with imaging-based data in Bioconductor with MoleculeExperiment
+
+```{r}
+# https://bioconductor.org/packages/devel/data/experiment/vignettes/SubcellularSpatialData/inst/doc/SubcellularSpatialData.html
+# BiocManager::install("stemangiola/SubcellularSpatialData")
+
+library(ExperimentHub)
+library(scater)
+library(scran)
+library(scuttle)
+library(tidySingleCellExperiment)
+library(tidySummarizedExperiment)
+library(tidySpatialExperiment)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggalt)
+library(magrittr)
+library(stringr)
+library(RColorBrewer)
+library(ggspavis)
+library(here)
+```
+
+#### SubcellularSpatialData
+
+This data package contains annotated datasets localized at the sub-cellular level from the STOmics, Xenium, and CosMx platforms, as analyzed in the publication by [Bhuva et al., 2024](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-024-03241-7). It includes raw transcript detections and provides functions to convert these into `SpatialExperiment` objects.
+
+```{r, eval=FALSE}
+library(SubcellularSpatialData)
+eh = ExperimentHub(cache = "/vast/scratch/users/mangiola.s")
+query(eh, "SubcellularSpatialData")
+
+# Brain Mouse data
+tx = eh[["EH8230"]]
+tx |> filter(sample_id=="Xenium_V1_FF_Mouse_Brain_MultiSection_1_outs") |> nrow()
+# 62,744,602
+```
+
+From this large dataset, we select a small reagion for illustrative purposes
+
+```{r, eval=FALSE}
+tx_small_region =
+  tx |>
+    filter(x |> between(3700, 4200), y |> between(5000, 5500))
+```
+
+Load the pre-saved data
+
+```{r}
+tx_small_region = spatialOmicsWorkshop2024::tx_small_region
+```
+
+#### An overview of the data
+
+
+```{r, fig.width=7, fig.height=8}
+# tx_small =  tx[sample(seq_len(nrow(tx)), size = nrow(tx)/500),]
+# tx_small |> saveRDS("xenium_SubcellularSpatialData.rds", compress = "xz")
+
+tx_small = spatialOmicsWorkshop2024::tx_small
+
+
+tx_small |>
+    ggplot(aes(x, y, colour = region)) +
+    geom_point(pch = ".") +
+    facet_wrap(~sample_id, ncol = 2) +
+    coord_fixed() +
+    theme_minimal() +
+    theme(legend.position = "none")
+```
+
+
+#### A preview to MoleculeExperiment
+
+The R package MoleculeExperiment includes functions to create and manipulate objects from the newly introduced MoleculeExperiment class, designed for analyzing molecule-based spatial transcriptomics data from platforms such as Xenium by 10X, CosMx SMI by Nanostring, and Merscope by Vizgen, among others.
+
+Although in this session we will not use `MoleculeExperiment` class, because of the lack of segmentation boundary information (we rather have cell identifiers), we briefly introduce this package because as an important part of Bioconductor.
+
+We show how we would import our table of probe location into a  `MoleculeExperiment`. At the end of the Session, for knowledge, we will navigate the example code given in the [vignette material](https://www.bioconductor.org/packages/release/bioc/vignettes/MoleculeExperiment/inst/doc/MoleculeExperiment.html).
+
+
+```{r}
+library(MoleculeExperiment)
+
+me = 
+  tx_small_region |> 
+    select(sample_id, gene, x, y) |> 
+    dataframeToMEList(
+        dfType = "molecules",
+        assayName = "detected",
+        sampleCol = "sample_id",
+        factorCol = "gene",
+        xCol = "x",
+        yCol = "y"
+    ) |> 
+    MoleculeExperiment()
+
+me
+```
+
+#### A preview of a zoomed in section of the tissue
+
+Now let's try to visualise just a small section. You can appreciate, coloured by cell, single molecules. You cqn also appreciate the difference in density between regions. An aspect to note, is that not all probes are withiin cells. This depends on the segmentation process.
+
+```{r, fig.width=7, fig.height=8}
+brewer.pal(7, "Set1")
+
+tx_small_region |>
+  filter(!is.na(cell)) |> 
+  slice_sample(prop = 0.2) |> 
+  ggplot(aes(x, y, colour = factor(cell))) +
+  geom_point(shape=".") +
+  
+  facet_wrap(~sample_id, ncol = 2) +
+  scale_color_manual(values = sample(colorRampPalette(brewer.pal(8, "Set2"))(1800))) +
+  coord_fixed() +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+
+Let's have a look to the probes that have not being unassigned to cells.
+
+```{r, fig.width=7, fig.height=8}
+
+tx_small_region |>
+  filter(is.na(cell)) |> 
+  ggplot(aes(x, y, colour = factor(cell))) +
+  geom_point(shape=".") +
+  
+  facet_wrap(~sample_id, ncol = 2) +
+  scale_color_manual(values = sample(colorRampPalette(brewer.pal(8, "Set2"))(1800))) +
+  coord_fixed() +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+
+We can appreciate how, even subsampling the data 1 in 500, we still have a vast amount of data to visualise.
+
+
+### 2. Aggregation and analysis
+
+We will convert our cell by gene count to a `SpatialExperiment`. This object stores a cell by gene matrix with relative XY coordinates.
+
+
+```{r}
+
+tx_spe = 
+  spatialOmicsWorkshop2024::tx_spe |> 
+  
+  # Scaling and tranformation
+  logNormCounts() 
+
+```
+
+https://bioconductor.org/packages/devel/bioc/vignettes/scran/inst/doc/scran.html
+
+```{r, fig.width=7, fig.height=8}
+tx_spe |> 
+  
+  # Gene variance
+  scran::modelGeneVar(block = tx_spe$sample_id) |> 
+  as.tibble(rownames  = "feature") |> 
+  
+  # Plot
+  ggplot(aes(mean, total)) +
+  geom_point() +
+  geom_smooth(color="red")+
+  xlab("Mean log-expression") + 
+  ylab("Variance") +
+  theme_bw()
+
+```
+
+
+```{r}
+# Get the top 2000 genes.
+top.hvgs = 
+  tx_spe |>
+  
+  # grouping
+  scran::modelGeneVar(block = tx_spe$sample_id) |> 
+  
+  # Model gene variance and select variable genes per sample
+  getTopHVGs(n=200) 
+```
+
+
+```{r}
+tx_spe_sample_1 = 
+  tx_spe |>
+  filter(sample_id=="1") |> 
+  slice_sample(prop = 0.2)
+
+# The selected subset of genes can then be passed to the subset.row argument (or equivalent) in downstream steps. This process is demonstrated below for the PCA step:
+
+tx_spe_sample_1 =  
+  tx_spe_sample_1 |> 
+  fixedPCA( subset.row=top.hvgs )
+
+```
+
+
+We then use the gene expression to cluster sales based on their similarity and represent these clusters in a two dimensional embeddings (UMAP)
+
+```{r}
+tx_spe_sample_1 = 
+  tx_spe_sample_1 |> 
+  mutate(clusters = 
+           tx_spe_sample_1 |> 
+           clusterCells(
+             use.dimred="PCA", 
+             BLUSPARAM=bluster::NNGraphParam(k=20, cluster.fun="louvain")
+            ) |> 
+           as.character()
+)
+
+
+## Check how many
+tx_spe_sample_1 = 
+  tx_spe_sample_1 |>
+  runUMAP() 
+
+```
+
+```{r, fig.width=7, fig.height=8}
+tx_spe_sample_1 |> 
+  plotUMAP(colour_by = "clusters") +
+  scale_color_discrete(
+    brewer.pal(n = 30, name = "Set1")
+  )
+```
+
+Plot ground truth in tissue map
+
+```{r, fig.width=7, fig.height=8}
+
+tx_spe_sample_1 |> 
+  mutate(in_tissue = TRUE) |> 
+  plotSpots(annotate = "region", 
+          palette = colorRampPalette( brewer.pal(9,"Set1") )(150) 
+        ) + 
+  guides(color = "none")
+
+```
+
+### 3. Cell type caracterisation
+
+```{r}
+
+
+```
+
+### 4. Neighborhood analyses
+
+
+https://www.bioconductor.org/packages/release/bioc/vignettes/hoodscanR/inst/doc/Quick_start.html
+
+
+https://divingintogeneticsandgenomics.com/post/neighborhood-cellular-niches-analysis-with-spatial-transcriptome-data-in-seurat-and-bioconductor/
+
+:::: {.note}
+**Excercise**
+
+**Spatial-aware clustering:** Apply the spatial aware clustering method BANKSY. Taking as example the code run for session 2.
+::::
+
+### 5. Neighborhood analysis
+
+```{r, fig.width=7, fig.height=8, message=FALSE}
+
+library(hoodscanR)
+library(scico)
+library(ggspavis)
+
+```
+
+In order to perform neighborhood scanning, we need to firstly identify k (in this example, k = 100) nearest cells for each cells. The searching algorithm is based on Approximate Near Neighbor (ANN) C++ library from the RANN package.
+
+```{r}
+tx_spe_neighbours = 
+  tx_spe_sample_1 |> 
+  readHoodData(anno_col = "clusters") |> 
+  findNearCells(k = 100)
+
+tx_spe_neighbours
+```
+
+The output of findNearCells function includes two matrix, an annotation matrix and a distance matrix.
+
+```{r}
+tx_spe_neighbours$cells[1:10, 1:5]
+
+tx_spe_neighbours$distance[1:10, 1:5]
+
+```
+
+We can then perform neighborhood analysis using the function scanHoods. This function incldue the modified softmax algorithm, aimming to genereate a matrix with the probability of each cell associating with their 100 nearest cells.
+
+```{r}
+  # Calculate neighbours
+pm <- scanHoods(tx_spe_neighbours$distance)
+
+ # We can then merge the probabilities by the cell types of the 100 nearest cells. We get the probability distribution of each cell all each neighborhood. 
+hoods <- mergeByGroup(pm, tx_spe_neighbours$cells)
+
+hoods |> head()
+```
+
+
+We plot randomly plot 10 cells to see the output of neighborhood scanning using plotHoodMat. In this plot, each value represent the probability of the each cell (each row) located in each cell type neighborhood. The rowSums of the probability maxtrix will always be 1.
+
+```{r, fig.width=7, fig.height=8}
+hoods |> plotHoodMat(n = 10, hm_height = 5)
+```
+
+We can then merge the neighborhood results with the `SpatialExperiment` object using `mergeHoodSpe` so that we can conduct more neighborhood-related analysis.
+
+```{r}
+tx_spe_sample_1 =  tx_spe_sample_1 |> mergeHoodSpe(hoods)
+```
+
+We can see what are the neighborhood distributions look like in each cluster using `plotProbDist.`
+
+```{r, fig.width=7, fig.height=8}
+tx_spe_sample_1 |> 
+  plotProbDist(
+    pm_cols = colnames(hoods),
+    by_cluster = TRUE, 
+    plot_all = TRUE, 
+    show_clusters = as.character(seq(10))
+    )
+```
+
+
+### 6. Supplementary: `MoleculeExperiment` package
+
+https://www.bioconductor.org/packages/release/bioc/vignettes/MoleculeExperiment/inst/doc/MoleculeExperiment.html
+
+```{r, fig.width=7, fig.height=8}
+
+library(MoleculeExperiment)
+
+repoDir = system.file("extdata", package = "MoleculeExperiment")
+repoDir = paste0(repoDir, "/xenium_V1_FF_Mouse_Brain")
+
+me = readXenium(repoDir, keepCols = "essential")
+me
+
+
+repoDir = system.file("extdata", package = "MoleculeExperiment")
+repoDir = paste0(repoDir, "/xenium_V1_FF_Mouse_Brain")
+boundaries(me, "nucleus") = readBoundaries(
+  dataDir = repoDir,
+  pattern = "nucleus_boundaries.csv",
+  segmentIDCol = "cell_id",
+  xCol = "vertex_x",
+  yCol = "vertex_y",
+  keepCols = "essential",
+  boundariesAssay = "nucleus",
+  scaleFactorVector = 1
+)
+
+
+
+boundaries(me, "cell")
+showMolecules(me)
+
+bds_colours = setNames(
+  c("#aa0000ff", "#ffaaffff"),
+  c("Region 1", "Region 2")
+)
+
+ggplot_me() +
+  # add cell segments and colour by cell id
+  geom_polygon_me(me, byFill = "segment_id", colour = "black", alpha = 0.1) +
+  # add molecule points and colour by feature name
+  geom_point_me(me, byColour = "feature_id", size = 0.1) +
+  # add nuclei segments and colour the border with red
+  geom_polygon_me(me, assayName = "nucleus", fill = NA, colour = "red") +
+  # zoom in to selected patch area
+  coord_cartesian(xlim = c(4900, 4919.98), ylim = c(6400.02, 6420))
+```
+
+
+**Session Information**
+
+```{r}
+sessionInfo()
+```
+
+**References**
+
+```{css echo=FALSE}
+.note {
+  margin: 30px;
+  padding: 1em;
+  background: #FFF8F0;
+  border: 1px solid #EFE8E0;
+  border-radius: 10px;
+}
+```
