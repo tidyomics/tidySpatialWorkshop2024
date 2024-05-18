@@ -5,7 +5,7 @@
 [![Check, build, and push image](https://github.com/tidyomics/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml)
 <!-- badges: end -->
 
-## Instructor names and contact information
+## Instructor names and contact information 
 
 * Stefano Mangiola <mangiola.s at wehi.edu.au>
 * Michael Love <michaelisaiahlove at gmail.com>
