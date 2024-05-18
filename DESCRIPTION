@@ -1,4 +1,4 @@
-Package: tidyomicsWorkshopBioc2023
+Package: tidySpatialWorkshop2024
 Title: Tidy genomic and transcriptomic single-cell analyses
 Version: 0.16.13
 Authors@R: 
@@ -65,7 +65,7 @@ Suggests:
     rmarkdown,
     pkgdown
 Biarch: true
-URL: https://tidyomics.github.io/tidyomicsWorkshopBioc2023
-BugReports: https://github.com/tidyomics/tidyomicsWorkshopBioc2023/issues/new/choose
+URL: https://tidyomics.github.io/tidySpatialWorkshop2024
+BugReports: https://github.com/tidyomics/tidySpatialWorkshop2024/issues/new/choose
 VignetteBuilder: knitr
-DockerImage: ghcr.io/tidyomics/tidyomicsWorkshopBioc2023:latest
+DockerImage: ghcr.io/tidyomics/tidySpatialWorkshop2024:latest

@@ -5,7 +5,7 @@ author:
   - Stefano Mangiola, Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
   - Michael Love, UNC-Chapel Hill^[<michaelisaiahlove at gmail.com>]
 output: rmarkdown::html_vignette
-bibliography: "`r file.path(system.file(package='tidyomicsWorkshopBioc2023', 'vignettes'), 'tidyomics.bib')`"
+bibliography: "`r file.path(system.file(package='tidySpatialWorkshop2024', 'vignettes'), 'tidyomics.bib')`"
 vignette: >
   %\VignetteIndexEntry{Tidy genomic and transcriptomic single-cell analyses}
   %\VignetteEngine{knitr::rmarkdown}
@@ -62,17 +62,17 @@ screens.
 We will use the Cloud during the workshop and this method is available
 if you want to run the material after the workshop. If you want to
 install on your own computer, see instructions 
-[here](https://tidyomics.github.io/tidyomicsWorkshopBioc2023/index.html#workshop-package-installation).
+[here](https://tidyomics.github.io/tidySpatialWorkshop2024/index.html#workshop-package-installation).
 
 Alternatively, you can view the material at the workshop webpage 
-[here](https://tidyomics.github.io/tidyomicsWorkshopBioc2023/articles/main.html).
+[here](https://tidyomics.github.io/tidySpatialWorkshop2024/articles/main.html).
 
 ## Introduction slides
 
 We provide two links to introductory material (to consult outside of
 the workshop slot):
 
-1. [Introduction to tidytranscriptomics](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidyomics/tidyomicsWorkshopBioc2023/master/inst/tidytranscriptomics_slides.pdf)
+1. [Introduction to tidytranscriptomics](https://docs.google.com/gview?url=https://raw.githubusercontent.com/tidyomics/tidySpatialWorkshop2024/master/inst/tidytranscriptomics_slides.pdf)
 2. [Introduction to tidy genomics](https://github.com/tidyomics/tidy-genomics-talk/blob/main/tidy-genomics-talk.pdf)
 
 # Part 1 Introduction to tidySingleCellExperiment
@@ -99,7 +99,7 @@ metastatic breast cancer patients.
 
 ```{r}
 # load single cell RNA sequencing data
-sce_obj <- tidyomicsWorkshopBioc2023::sce_obj
+sce_obj <- tidySpatialWorkshop2024::sce_obj
 
 # take a look
 sce_obj
@@ -308,7 +308,7 @@ sce_scored |>
   ggplot(aes(UMAP_1, UMAP_2, color = signature_score)) +
   geom_point() +
   scale_color_distiller(palette = "Spectral") +
-  tidyomicsWorkshopBioc2023::theme_multipanel
+  tidySpatialWorkshop2024::theme_multipanel
 ```
 
 For exploratory analyses, we can select the gamma delta T cells, the
@@ -390,7 +390,7 @@ dimensions. This is a fantastic way to visualise both reduced
 dimensions and metadata in the same representation.
 
 ```{r umap plot 2, message = FALSE, warning = FALSE}
-pbmc <- tidyomicsWorkshopBioc2023::sce_obj_UMAP3
+pbmc <- tidySpatialWorkshop2024::sce_obj_UMAP3
 
 pbmc |>
   plot_ly(
@@ -565,7 +565,7 @@ Loading those peaks.
 
 ```{r}
 # loading those H3K4me3 peaks for PBMCs
-peaks <- tidyomicsWorkshopBioc2023::pbmc_h3k4me3_hg38
+peaks <- tidySpatialWorkshop2024::pbmc_h3k4me3_hg38
 plot(peaks$qValue, type="l", ylab="q-value", main="H3K4me3 peaks")
 abline(v=5000, lty=2)
 ```

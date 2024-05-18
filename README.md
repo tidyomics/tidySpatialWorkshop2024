@@ -1,8 +1,8 @@
-# tidyomicsWorkshopBioc2023
+# tidySpatialWorkshop2024
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
-[![Check, build, and push image](https://github.com/tidyomics/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/tidyomicsWorkshopBioc2023/actions/workflows/basic_checks.yaml)
+[![Check, build, and push image](https://github.com/tidyomics/tidySpatialWorkshop2024/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/tidySpatialWorkshop2024/actions/workflows/basic_checks.yaml)
 <!-- badges: end -->
 
 ## Instructor names and contact information 
@@ -12,7 +12,7 @@
 
 ## Syllabus
 
-Material [web page](https://tidyomics.github.io/tidyomicsWorkshopBioc2023/).
+Material [web page](https://tidyomics.github.io/tidySpatialWorkshop2024/).
 
 More details on the workshop are below.
 
@@ -35,16 +35,16 @@ Bioconductor 3.17.
           
 # Install workshop package
 
-remotes::install_github("tidyomics/tidyomicsWorkshopBioc2023", build_vignettes = TRUE)
+remotes::install_github("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE)
 
 # To view vignette
-library(tidyomicsWorkshopBioc2023)
+library(tidySpatialWorkshop2024)
 vignette("tidyGenomicsTranscriptomics")
 ```
 
 To run the code, you could then copy and paste the code from the
 workshop vignette or 
-[R markdown file](https://raw.githubusercontent.com/tidyomics/tidyomicsWorkshopBioc2023/master/vignettes/tidyGenomicsTranscriptomics.Rmd)
+[R markdown file](https://raw.githubusercontent.com/tidyomics/tidySpatialWorkshop2024/master/vignettes/tidyGenomicsTranscriptomics.Rmd)
 into a new R Markdown file on your computer. 
 
 ## Workshop Description
