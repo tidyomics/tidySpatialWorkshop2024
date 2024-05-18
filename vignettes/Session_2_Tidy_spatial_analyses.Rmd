@@ -3,7 +3,7 @@ title: "Tidy spatial analyses"
 author:
   - Stefano Mangiola, South Australian immunoGENomics Cancer Institute^[<mangiola.stefano@adelaide.edu.au>], Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
 output: rmarkdown::html_vignette
-# bibliography: "`r file.path(system.file(package='spatialOmicsWorkshop2024', 'vignettes'), 'tidyomics.bib')`"
+# bibliography: "`r file.path(system.file(package='tidySpatialWorkshop2024', 'vignettes'), 'tidyomics.bib')`"
 vignette: >
   %\VignetteIndexEntry{Tidy spatial analyses}
   %\VignetteEncoding{UTF-8}
@@ -24,7 +24,7 @@ library(here)
 
 A good introduction of `tidyomics` can be found here
 
-[tidyomicsWorkshopBioc2023](https://github.com/tidyomics/tidyomicsWorkshopBioc2023) 
+[tidySpatialWorkshop2024](https://github.com/tidyomics/tidySpatialWorkshop2024) 
 [tidy transcriptomic manifesto](https://tidyomics.github.io/tidyomicsBlog/post/2021-07-07-tidy-transcriptomics-manifesto/)
 
 `tidyomics` is an interoperable software ecosystem that bridges Bioconductor and the tidyverse. `tidyomics` is installable with a single homonymous meta-package. This ecosystem includes three new packages: tidySummarizedExperiment, tidySingleCellExperiment, and tidySpatialExperiment, and five publicly available R packages: `plyranges`, `nullranges`, `tidyseurat`, `tidybulk`, `tidytof`. Importantly, `tidyomics` leaves the original data containers and methods unaltered, ensuring compatibility with existing software, maintainability and long-term Bioconductor support. 

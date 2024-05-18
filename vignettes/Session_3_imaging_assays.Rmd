@@ -60,29 +60,20 @@ tx |> filter(sample_id=="Xenium_V1_FF_Mouse_Brain_MultiSection_1_outs") |> nrow(
 # 62,744,602
 ```
 
-From this large dataset, we select a small reagion for illustrative purposes
-
-```{r, eval=FALSE}
-tx_small_region =
-  tx |>
-    filter(x |> between(3700, 4200), y |> between(5000, 5500))
-```
-
-Load the pre-saved data
-
-```{r}
-tx_small_region = spatialOmicsWorkshop2024::tx_small_region
-```
-
 #### An overview of the data
 
 
+```{r, fig.width=7, fig.height=8, eval=FALSE}
+tx_small =  tx[sample(seq_len(nrow(tx)), size = nrow(tx)/500),]
+```
+
+```{r, echo=FALSE}
+tx_small_file = tempfile() 
+utils:: download.file("https://zenodo.org/records/11213118/files/tx_small.rda?download=1", destfile = tx_small_file)
+load(tx_small_file)
+```
+
 ```{r, fig.width=7, fig.height=8}
-# tx_small =  tx[sample(seq_len(nrow(tx)), size = nrow(tx)/500),]
-# tx_small |> saveRDS("xenium_SubcellularSpatialData.rds", compress = "xz")
-
-tx_small = spatialOmicsWorkshop2024::tx_small
-
 
 tx_small |>
     ggplot(aes(x, y, colour = region)) +
@@ -102,6 +93,21 @@ Although in this session we will not use `MoleculeExperiment` class, because of 
 
 We show how we would import our table of probe location into a  `MoleculeExperiment`. At the end of the Session, for knowledge, we will navigate the example code given in the [vignette material](https://www.bioconductor.org/packages/release/bioc/vignettes/MoleculeExperiment/inst/doc/MoleculeExperiment.html).
 
+From this large dataset, we select a small reagion for illustrative purposes
+
+```{r, eval=FALSE}
+tx_small_region =
+  tx |>
+    filter(x |> between(3700, 4200), y |> between(5000, 5500))
+```
+
+Load the pre-saved data
+
+```{r, echo=FALSE}
+tx_small_region_file = tempfile() 
+utils::download.file("https://zenodo.org/records/11213155/files/tx_small_region.rda?download=1", destfile = tx_small_region_file)
+load(tx_small_region_file)
+```
 
 ```{r}
 library(MoleculeExperiment)
@@ -167,11 +173,16 @@ We can appreciate how, even subsampling the data 1 in 500, we still have a vast 
 
 We will convert our cell by gene count to a `SpatialExperiment`. This object stores a cell by gene matrix with relative XY coordinates.
 
+```{r}
+tx_spe_file = tempfile() 
+utils::download.file("https://zenodo.org/records/11213166/files/tx_spe.rda?download=1", destfile = tx_spe_file)
+load(tx_spe_file)
+```
 
 ```{r}
 
 tx_spe = 
-  spatialOmicsWorkshop2024::tx_spe |> 
+  tx_spe |> 
   
   # Scaling and tranformation
   logNormCounts() 

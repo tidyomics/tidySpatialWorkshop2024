@@ -41,7 +41,7 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 
 You can view the material at the workshop webpage
 
-[here](https://tidyomics.github.io/spatialOmicsWorkshop2024/articles/main.html).
+[here](https://tidyomics.github.io/tidySpatialWorkshop2024/articles/main.html).
 
 ### Installation
 
