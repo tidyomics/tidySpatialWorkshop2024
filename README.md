@@ -1,64 +1,50 @@
-# tidySpatialWorkshop2024
+# spatialOmicsWorkshop2024
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
-[![Check, build, and push image](https://github.com/tidyomics/tidySpatialWorkshop2024/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/tidySpatialWorkshop2024/actions/workflows/basic_checks.yaml)
+[![Check, build, and push image](https://github.com/tidyomics/spatialOmicsWorkshop2024/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/spatialOmicsWorkshop2024/actions/workflows/basic_checks.yaml)
 <!-- badges: end -->
 
-## Instructor names and contact information 
+## Instructor names and contact information
 
-* Stefano Mangiola <mangiola.s at wehi.edu.au>
-* Michael Love <michaelisaiahlove at gmail.com>
+* Stefano Mangiola <stefano.mangiola at adelaide.edu.au>
+* Luciano Martelotto <luciano.martelotto at adelaide.edu.au>
 
 ## Syllabus
 
-Material [web page](https://tidyomics.github.io/tidySpatialWorkshop2024/).
+Material [web page](https://tidyomics.github.io/spatialOmicsWorkshop2024/).
 
 More details on the workshop are below.
-
-## Conference Galaxy platform
-
-You can find the workshop on the [BioC2023 Galaxy platform](https://workshop.bioconductor.org/) listed as:
-
-* **Package Demo: tidySingleCellExperiment** showing tidy genomic and transcriptomic analyses, for a single-cell RNA-seq application
-
-Click [here](https://bioc2023.bioconductor.org/workshops/) for a full list of the BioC2023 workshop demos.
 
 ## Workshop package installation 
 
 If you want to install the packages and material post-workshop, the
-instructions are below. The workshop is designed for R `4.3` and
-Bioconductor 3.17. 
+instructions are below. The workshop is designed for R `4.4` and
+Bioconductor 3.19. 
 
 ```
 #install.packages('remotes')
           
 # Install workshop package
 
-remotes::install_github("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE)
+remotes::install_github("stemangiola/spatial_omics_workshop_2024", build_vignettes = TRUE)
 
 # To view vignette
-library(tidySpatialWorkshop2024)
-vignette("tidyGenomicsTranscriptomics")
+library(spatialOmicsWorkshop2024)
+vignette("Introduction")
 ```
 
-To run the code, you could then copy and paste the code from the
-workshop vignette or 
-[R markdown file](https://raw.githubusercontent.com/tidyomics/tidySpatialWorkshop2024/master/vignettes/tidyGenomicsTranscriptomics.Rmd)
+To run the code, you could then copy and paste the code from the workshop vignette or 
+[R markdown file](https://github.com/stemangiola/spatial_omics_workshop_2024/blob/devel/vignettes/Session_1_sequencing_assays.Rmd)
 into a new R Markdown file on your computer. 
 
 ## Workshop Description
 
-This tutorial will present how to perform analysis of single-cell RNA
-sequencing data following the tidy data paradigm. The tidy data
-paradigm provides a standard way to organise data values within a
-dataset, where each variable is a column, each observation is a row,
-and data is manipulated using an easy-to-understand vocabulary. Most
-importantly, the data structure remains consistent across manipulation
-and analysis functions.
+This workshop aims to equip participants with a foundational understanding of spatial omics, exploring its significant technologies, applications, and the distinction between imaging and sequencing approaches. We'll begin with a welcome session, outlining the objectives and structure for the day. The content will delve into the basics of spatial omics, discussing its relevance in modern biology and its impact on scientific research. We'll then compare various spatial omics technologies, focusing on the differences and practical considerations between imaging-based and sequencing-based methodologies.
 
-This can be achieved with the integration of packages present in the R
-CRAN and Bioconductor ecosystem, including
+Further, we'll examine detailed sequencing techniques, experimental design, and data analysis challenges, providing insights into effective problem-solving strategies. An overview of analysis frameworks, including principles of 'tidy' data in spatial omics, will also be covered. The workshop will conclude with a summary of key takeaways and a Q&A session, ensuring participants leave with a comprehensive understanding of spatial omics. This session promises to be insightful, offering valuable knowledge for attendees to apply in their research fields.
+
+This can be achieved with the integration of packages present in the R CRAN and Bioconductor ecosystem, including
 [tidyseurat](https://stemangiola.github.io/tidyseurat/),
 [tidySingleCellExperiment](https://stemangiola.github.io/tidySingleCellExperiment/)
 and [tidyverse](https://www.tidyverse.org/). These packages are part
@@ -76,50 +62,43 @@ with further information provided in the
 
 ### Pre-requisites
 
-* Basic familiarity with single cell transcriptomic analyses
+* Basic familiarity with R
 * Basic familiarity with tidyverse
-* Basic familiarity with genomic ranges
+* Basic familiarity with transcriptomic analyses
 
 ### Workshop Participation
 
-The workshop format is a 45 minute session consisting of hands-on
+The workshop format is 3 days with 3 hour sessions consisting of introduction of the experimental techniques, and hands-on
 demos, exercises and Q&A. 
 
 ### _R_ / _Bioconductor_ packages used
 
-* tidySingleCellExperiment
-* plyranges
+* SpatialExperiment
+* MoleculeExperiment
+
+* SubcellularSpatialData
+* ExperimentHub
+* spatialLIBD
+* CuratedAtlasQueryR
+
+* tidyverse
+* tidySpatialExperiment
+* tidySummarizedExperiment
+* tidybulk
+
+* scater
+* scran
+* scuttle
+* Seurat
+
+* SPOTlight
+* Banksy
+* hoodscanR
+
 
 ### Workshop goals and objectives
 
-The tidytranscriptomics approach to single-cell RNA sequencing data
-analysis abstracts out the coding-related complexity and provides
-tools that use an intuitive and jargon-free vocabulary, enabling focus
-on the statistical and biological challenges.
+Provide a foundational understanding of spatial omics, covering different technologies and the distinctions between imaging and
+sequencing in experimental and analytical contexts. This with a focus on the tidy R paradigm and tidyomics.
 
-#### Learning goals
 
-* To approach data representation and analysis though a tidy data
-  paradigm, integrating tidyverse with the SingleCellExperiment data
-  object.
-* To explore integration of genomic and transcriptomic data also using
-  a tidy data paradigm.
-
-#### What you will learn
-
--   Basic `tidy` operations possible with `tidySingleCellExperiment`
-    and `GRanges`
--   How to interface `SingleCellExperiment` with tidy manipulation and
-    visualisation 
--   A real-world case study that will showcase the power of `tidy`
-    single-cell methods compared with base/ad-hoc methods
--   Examples of how to integrate genomic and transcriptomic data
-    (ChIP-seq and RNA-seq)
-
-#### What you will *not* learn
-
--   The molecular technology of single-cell sequencing
--   The fundamentals of single-cell data analysis
--   The fundamentals of tidy data analysis
--   Detailed data integration methods (multi-view or multi-omics
-    algorithms)
