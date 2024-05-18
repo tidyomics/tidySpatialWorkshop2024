@@ -1,18 +1,13 @@
 Package: tidySpatialWorkshop2024
 Title: Tidy genomic and transcriptomic single-cell analyses
-Version: 0.16.13
+Version: 0.17.0
 Authors@R: 
     c(
     person(given = "Stefano",
            family = "Mangiola",
-           role = c("aut"),
-           email = "mangiola.s@wehi.edu.au",
-           comment = c(ORCID = "0000-0001-7474-836X")),
-    person(given = "Michael",
-           family = "Love",
            role = c("aut", "cre"),
-           email = "michaelisaiahlove@gmail.com",
-           comment = c(ORCID = "0000-0001-8401-0545"))
+           email = "mangiola.s@wehi.edu.au",
+           comment = c(ORCID = "0000-0001-7474-836X"))
 	   )
 Description: Workflow for BioC conference showing tidy genomic
     and transcriptomic analyses, for a single-cell RNA-seq
@@ -22,7 +17,7 @@ Encoding: UTF-8
 LazyData: true
 LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Depends:
     Biobase,
     R (>= 4.2.0)
