@@ -522,15 +522,16 @@ Those two clusters group the white matter from the rest of the layers.
 
 ```{r, fig.width=7, fig.height=8}
 ## Plot in tissue map
-ggspavis::plotSpots(spatial_data, annotate = "label") + scale_color_brewer(palette = "Paired")
+ggspavis::plotSpots(spatial_data, annotate = "label") + 
+  scale_color_brewer(palette = "Paired")
 ```
 
 As for comparison, we show the manually annotated regions. We can see that while the single cell style clustering catchers, the overall tissue, architecture, a lot of details are not retrieved. We clusters cannot faithfully recapitulate the tissue morphology. However, they might represent specific cell types within morphological regions.
 
 ```{r, fig.width=7, fig.height=8}
 ## Plot ground truth in tissue map
-ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD", 
-          palette = "libd_layer_colors")
+ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
+  scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
 
 ```
 
@@ -691,7 +692,7 @@ pal <- c(
 )
 
 plot_bank_smooth <- lapply(spatial_data_list, function(x) {
-  plotSpots(x, annotate = sprintf("%s_smooth", "clust_M0_lam0.2_k50_res0.7"), pal = pal) +
+  ggspavis::plotSpots(x, annotate = sprintf("%s_smooth", "clust_M0_lam0.2_k50_res0.7"), pal = pal) +
     theme(legend.position = "none") +
     labs(title = "BANKSY clusters")
 })
@@ -699,8 +700,8 @@ plot_bank_smooth <- lapply(spatial_data_list, function(x) {
 
 plot_grid(plotlist = plot_bank_smooth, ncol = 3, byrow = TRUE)
 
-plotSpots(spatial_data, annotate = "spatialLIBD", 
-          palette = "libd_layer_colors") +
+ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
+    scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
   theme(legend.position = "none") +
   labs(title = "spatialLIBD regions")
 ```
@@ -720,7 +721,7 @@ We have applied cluster smoothing using `smoothLabels`. How much do you think th
 spe_joint <- do.call(cbind, spatial_data_list)
 
 
- plotSpots(spe_joint, annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), size = 0.8, pal = pal) +
+ ggspavis::plotSpots(spe_joint, annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), size = 0.8, pal = pal) +
     theme(legend.position = "none") +
     labs(title = "BANKSY clusters")
 
@@ -981,12 +982,12 @@ is_endothelial_oligodendrocytes = mat_df$endothelial_cell >0.1 & mat_df$oligoden
 spatial_data$is_endothelial_leptomeningeal = is_endothelial_leptomeningeal
 spatial_data$is_endothelial_oligodendrocyte = is_endothelial_oligodendrocytes
 
-plotSpots(spatial_data, annotate = "is_endothelial_leptomeningeal") +
+ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_leptomeningeal") +
   scale_color_manual(values = c("TRUE"= "red", "FALSE" = "grey"))
 theme(legend.position = "none") +
   labs(title = "endothelial + leptomeningeal")
 
-plotSpots(spatial_data, annotate = "is_endothelial_oligodendrocyte") +
+ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_oligodendrocyte") +
   scale_color_manual(values = c("TRUE"= "blue", "FALSE" = "grey"))
 theme(legend.position = "none") +
   labs(title = "endothelial + oligodendrocyte")

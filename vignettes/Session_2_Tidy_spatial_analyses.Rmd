@@ -263,10 +263,8 @@ We can visualise the gating
 spatial_data |> 
   
   # Plot our gate
-  plotSpots(
-    annotate = ".gate", 
-    palette = "libd_layer_colors"
-    ) +
+  ggspavis::plotSpots(annotate = ".gate") +
+    scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
   labs(title = ".gate regions")
   
 ```
@@ -507,10 +505,8 @@ Let’s visualise the regions that spatialLIBD labelled across three Visium 10X 
 
 ```{r, fig.width=7, fig.height=8}
 spatial_data_filtered |> 
-  plotSpots(
-    annotate = "spatialLIBD", 
-    palette = "libd_layer_colors"
-    ) +
+  ggspavis::plotSpots(annotate = "spatialLIBD") +
+    scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
   theme(legend.position = "none") +
   labs(title = "spatialLIBD regions")
 ```

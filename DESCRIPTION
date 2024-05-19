@@ -60,7 +60,12 @@ Suggests:
     rmarkdown,
     pkgdown
 Biarch: true
-Remotes: lmweber/ggspavis
+Remotes: 
+    lmweber/ggspavis,
+    stemangiola/tidySummarizedExperiment,
+    stemangiola/tidySpatialExperiment,
+    stemangiola/tidybulk,
+    stemangiola/tidygate
 URL: https://tidyomics.github.io/tidySpatialWorkshop2024
 BugReports: https://github.com/tidyomics/tidySpatialWorkshop2024/issues/new/choose
 VignetteBuilder: knitr

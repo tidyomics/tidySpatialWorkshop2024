@@ -273,8 +273,9 @@ Plot ground truth in tissue map
 
 tx_spe_sample_1 |> 
   mutate(in_tissue = TRUE) |> 
-  plotSpots(annotate = "region", 
-          palette = colorRampPalette( brewer.pal(9,"Set1") )(150) 
+  ggspavis::plotSpots(
+    annotate = "region", 
+    palette = colorRampPalette( brewer.pal(9,"Set1") )(150) 
         ) + 
   guides(color = "none")
 
