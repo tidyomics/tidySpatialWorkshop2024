@@ -23,10 +23,15 @@ instructions are below. The workshop is designed for R `4.4` and
 Bioconductor 3.19. 
 
 ```
-#install.packages('remotes')
-          
+# Install preliminary packages 
+
+# install.packages("markdown")
+# BiocManager::install("BiocStyle")
+# BiocManager::install("DropletUtils")
+
 # Install workshop package
 
+#install.packages('remotes')
 remotes::install_github("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE)
 
 # To view vignette
@@ -43,22 +48,6 @@ into a new R Markdown file on your computer.
 This workshop aims to equip participants with a foundational understanding of spatial omics, exploring its significant technologies, applications, and the distinction between imaging and sequencing approaches. We'll begin with a welcome session, outlining the objectives and structure for the day. The content will delve into the basics of spatial omics, discussing its relevance in modern biology and its impact on scientific research. We'll then compare various spatial omics technologies, focusing on the differences and practical considerations between imaging-based and sequencing-based methodologies.
 
 Further, we'll examine detailed sequencing techniques, experimental design, and data analysis challenges, providing insights into effective problem-solving strategies. An overview of analysis frameworks, including principles of 'tidy' data in spatial omics, will also be covered. The workshop will conclude with a summary of key takeaways and a Q&A session, ensuring participants leave with a comprehensive understanding of spatial omics. This session promises to be insightful, offering valuable knowledge for attendees to apply in their research fields.
-
-This can be achieved with the integration of packages present in the R CRAN and Bioconductor ecosystem, including
-[tidyseurat](https://stemangiola.github.io/tidyseurat/),
-[tidySingleCellExperiment](https://stemangiola.github.io/tidySingleCellExperiment/)
-and [tidyverse](https://www.tidyverse.org/). These packages are part
-of the tidytranscriptomics suite that introduces a tidy approach to
-RNA sequencing data representation and analysis. For more information
-see the [tidy transcriptomics
-blog](https://stemangiola.github.io/tidytranscriptomics/). 
-
-In addition this workshop will finish with examples of how genomic and
-transcriptomic data can be combined, e.g. ChIP-seq and scRNA-seq, also
-using tidy data paradigms for genomic ranges. This is enabled with the 
-[plyranges](https://sa-lee.github.io/plyranges/) package,
-with further information provided in the 
-[tidy-ranges-tutorial](https://tidyomics.github.io/tidy-ranges-tutorial/).
 
 ### Pre-requisites
 

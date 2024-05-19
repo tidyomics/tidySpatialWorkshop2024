@@ -535,8 +535,6 @@ ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
 
 ```
 
-This setup ensures that the reasoning and methodology behind each step of the clustering process cell'sear and the visualisation steps demonstrate the practical application of clustering results to spatial data analysis.
-
 #### Spatially-aware clustering
 
 To cluster spatial regions (i.e. tissue domain) rather than single-cell types, the clustering algorithms need to take spatial context into account. For example what is the transcriptional profile of the neighbouring pixels or neighbouring cells.

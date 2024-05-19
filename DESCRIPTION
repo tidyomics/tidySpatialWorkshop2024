@@ -57,6 +57,7 @@ Imports:
     Seurat
 Suggests:
     knitr,
+    markdown,
     rmarkdown,
     pkgdown
 Biarch: true
