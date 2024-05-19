@@ -22,6 +22,9 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 
 **Dr. Stefano Mangiola** is leading the Computational Cancer immunology group at the South Australian immunoGENomics Cancer Institute (SAiGENCI). He uses single-cell and spatial technologies to investigate the tumor microenvironment and the immune system. Beyong data production, his focus in on the integration and modelling of large-scale single-cell data resources. He is the author of `tidytranscriptiomics` and co-leads the `tidyomics` endevour. 
 
+BLUESKY: https://bsky.app/profile/stemang.bsky.social
+TWITTER/X: https://x.com/steman_research
+
 
 **Dr. Luciano Martelotto** is a key figure in the field of spatial omics technology. He was previously the Scientific Director at the Single Cell Core facility at Harvard University, where he demonstrated his extensive expertise and significant contributions to the fields of single cell and spatial omics technology. Currently, he heads the Martelotto Lab located at the Adelaide Centre for Epigenetics and the South Australian immunoGENomics Cancer Institute (SAiGENCI). His lab is dedicated to the development and evaluation of new tools and methodologies for single cell and spatial omics, serving as an important incubator for innovation in these technologies. The lab engages in global collaborations and provides comprehensive support from the conceptual stage through to the analysis and delivery of results.
 
@@ -67,7 +70,10 @@ library(spatialOmicsWorkshop2024)
 vignette("Introduction")
 ```
 
-# Session 1: Introduction to Spatial Omics
+# Announcements
+
+
+# Introduction to Spatial Omics
 
 ### Objective
 
