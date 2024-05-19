@@ -20,18 +20,18 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Depends:
     Biobase,
-    R (>= 4.2.0)
+    R (>= 4.4.0)
 Imports:
     Banksy,
     colorspace,
     cowplot,
-    CuratedAtlasQueryR,
+    CuratedAtlasQueryR (>= 1.1.3),
     dittoSeq,
     dplyr,
     ExperimentHub,
     ggalt,
     ggplot2,
-    ggspavis,
+    ggspavis (>= 1.9.10),
     glue,
     here,
     HDF5Array,
@@ -48,10 +48,10 @@ Imports:
     spatialLIBD,
     stringr,
     SubcellularSpatialData,
-    tidybulk,
-    tidySingleCellExperiment,
+    tidybulk (>= 1.17.2),
+    tidySingleCellExperiment (>= 1.15.2),
     tidySpatialExperiment,
-    tidySummarizedExperiment,
+    tidySummarizedExperiment (>= 1.15.0),
     tidyverse,
     SPOTlight,
     Seurat
@@ -64,9 +64,10 @@ Biarch: true
 Remotes: 
     lmweber/ggspavis,
     stemangiola/tidySummarizedExperiment,
-    stemangiola/tidySpatialExperiment,
+    william-hutchison/tidySpatialExperiment,
     stemangiola/tidybulk,
     stemangiola/tidygate
+    stemangiola/CuratedAtlasQueryR
 URL: https://tidyomics.github.io/tidySpatialWorkshop2024
 BugReports: https://github.com/tidyomics/tidySpatialWorkshop2024/issues/new/choose
 VignetteBuilder: knitr
