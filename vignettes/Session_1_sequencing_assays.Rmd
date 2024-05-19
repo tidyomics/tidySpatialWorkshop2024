@@ -219,9 +219,10 @@ This visualisation focuses on specific tissue features within the dataset, empha
 ```{r, fig.width=7, fig.height=8}
 ggspavis::plotVisium(
   spatial_data, 
-  fill = "spatialLIBD", 
+  annotate = "spatialLIBD", 
   highlight = "in_tissue"
-)
+) 
+
 ```
 
 ### 5. Quality control and filtering
@@ -476,7 +477,7 @@ scater::plotUMAP(spatial_data, colour_by = "macro_cluster", point_size = 0.2)
 
 ggspavis::plotVisium(
   spatial_data, 
-  fill = "macro_cluster", 
+  annotate = "macro_cluster", 
   highlight = "in_tissue"
 )
 ```

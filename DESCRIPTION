@@ -62,6 +62,7 @@ Suggests:
     pkgdown
 Biarch: true
 Remotes: 
+    lawremi/rtracklayer,
     lmweber/ggspavis,
     stemangiola/tidySummarizedExperiment,
     william-hutchison/tidySpatialExperiment,
