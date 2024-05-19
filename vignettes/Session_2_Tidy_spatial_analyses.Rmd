@@ -259,7 +259,7 @@ spatial_data |> count(.gate)
 We can visualise the gating 
 
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, fig.width=7, fig.height=8}
 spatial_data |> 
   
   # Plot our gate
@@ -505,7 +505,7 @@ Here, we will show how to use ad-hoc spatial visualisation, as well as `ggplot` 
 
 Let’s visualise the regions that spatialLIBD labelled across three Visium 10X samples.
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 spatial_data_filtered |> 
   plotSpots(
     annotate = "spatialLIBD", 
@@ -519,7 +519,7 @@ spatial_data_filtered |>
 
 
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 spatial_data |> 
     ggplot(aes(array_row, array_col)) +
     geom_point(aes(color = spatialLIBD)) +

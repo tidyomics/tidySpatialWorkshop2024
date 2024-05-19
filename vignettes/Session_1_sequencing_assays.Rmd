@@ -27,7 +27,7 @@ data acquisition, and basic data manipulation and visualization.
 
 ### Session Structure
 
-**1. Introduction to Bioconductor**
+**Introduction to Bioconductor**
 
 What is Bioconductor?
 Its role in spatial omics analysis.

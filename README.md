@@ -27,7 +27,7 @@ Bioconductor 3.19.
           
 # Install workshop package
 
-remotes::install_github("stemangiola/spatial_omics_workshop_2024", build_vignettes = TRUE)
+remotes::install_github("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE)
 
 # To view vignette
 library(spatialOmicsWorkshop2024)
@@ -35,7 +35,7 @@ vignette("Introduction")
 ```
 
 To run the code, you could then copy and paste the code from the workshop vignette or 
-[R markdown file](https://github.com/stemangiola/spatial_omics_workshop_2024/blob/devel/vignettes/Session_1_sequencing_assays.Rmd)
+[R markdown file](https://github.com/tidyomics/tidySpatialWorkshop2024/blob/devel/vignettes/Session_1_sequencing_assays.Rmd)
 into a new R Markdown file on your computer. 
 
 ## Workshop Description
