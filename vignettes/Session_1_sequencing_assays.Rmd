@@ -15,81 +15,71 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 
 ```
 
-
-
 # Session 1: Spatial analyses of sequencing data
 
 ### Objective
 
-Introduce the Bioconductor framework with a focus on the
-`SpatialExperiment` package. Guide participants through installation,
-data acquisition, and basic data manipulation and visualization.
+Introduce the Bioconductor framework with a focus on the `SpatialExperiment` package. Guide participants through installation, data acquisition, and basic data manipulation and visualisation.
 
 ### Session Structure
 
 **Introduction to Bioconductor**
 
-What is Bioconductor?
-Its role in spatial omics analysis.
+What is Bioconductor? Its role in spatial omics analysis.
 
 **Getting Started with SpatialExperiment**
 
-Installation of `SpatialExperiment` and dependencies.
-Overview of the package's capabilities.
+Installation of `SpatialExperiment` and dependencies. Overview of the package's capabilities.
 
 **Downloading Example Dataset**
 
-Step-by-step guide on acquiring a sample dataset.
-Explanation of dataset characteristics.
+Step-by-step guide on acquiring a sample dataset. Explanation of dataset characteristics.
 
-**Data Visualization and Manipulation**
+**Data Visualisation and Manipulation**
 
-Basic visualization techniques.
-Manipulating spatial omics data using `SpatialExperiment`.
+Basic visualisation techniques. Manipulating spatial omics data using `SpatialExperiment`.
 
-**Excercises and Q&A**
+**Exercises and Q&A**
 
 Q&A session for clarifications and deeper insights.
 
 ### 1. Introduction to Bioconductor
 
-In this section of our R Markdown workshop, we delve into the world of Bioconductor and its significance in spatial omics analysis. Understanding Bioconductor is fundamental for anyone venturing into the complex and fascinating field of bioinformatics, especially in the analysis of spatially resolved data.
+In this section of our R Markdown workshop, we delve into the world of Bioconductor and its significance in spatial omics analysis. Understanding Bioconductor is fundamental for anyone venturing into the complex and fascinating field of bioinformatics, especially in analysing spatially resolved data.
 
 **What is Bioconductor?**
 
-Bioconductor is a pioneering software project that specializes in the analysis and comprehension of genomic data. It is an open-source, open-development platform primarily based on the R statistical programming language.
+Bioconductor is a pioneering software project that specialises in the analysis and comprehension of genomic data. It is an open-source, open-development platform primarily based on the R statistical programming language.
 
 **The key features of Bioconductor include:**
 
-- **Extensive Range of Packages:** Bioconductor offers a vast collection of packages that are specifically designed for the analysis of high-throughput genomic data. This includes genomics, transcriptomics, proteomics and other high-throughput data domains
+-   **Extensive Range of Packages:** Bioconductor offers a vast collection of packages specifically designed to analyse high-throughput genomic data. This includes genomics, transcriptomics, proteomics and other high-throughput data domains
 
--   **Community-Driven Development:** Bioconductor is developed by a global community of scientists and programmers, ensuring that it stays at the forefront of genomic research and bioinformatics.
+-   **Community-Driven Development:** Bioconductor is developed by a global community of scientists and programmers, ensuring it stays at the forefront of genomic research and bioinformatics.
 
--   **Reproducible Research:** It emphasizes reproducibility and provides tools that facilitate the sharing of data, code, and research workflows.
+-   **Reproducible Research:** It emphasises reproducibility and provides tools that facilitate the sharing of data, code, and research workflows.
 
 **Bioconductor's role in Spatial Omics Analysis**
 
-This is an emerging field that combines traditional omics data (like genomics, transcriptomics) with spatial context. This means understanding how the expression of genes varies across different physical locations within a tissue or cell. Here's how Bioconductor contributes to this field:
+This emerging field combines traditional omics data (like genomics and transcriptomics) with spatial context. This means understanding how the expression of genes varies across different physical locations within a tissue or cell. How Bioconductor contributes to this field:
 
--   **Specialized Packages:** Bioconductor offers packages tailored for spatial omics analysis. These packages can handle spatially resolved transcriptomics data, enabling researchers to analyze and visualizec the spatial distribution of gene expression.
+-   **Specialised Packages:** Bioconductor offers packages tailored for spatial omics analysis. These packages can handle spatially resolved transcriptomics data, enabling researchers to analyse and visualize the spatial distribution of gene expression.
 
--   **Data Management:** It provides robust solutions for managing the complex and large datasets typical in spatial omics, ensuring efficient data handling and processing.
+-   **Data Management:** It provides robust solutions for managing complex and large datasets typical in spatial omics, ensuring efficient data handling and processing.
 
 -   **Statistical Analysis Tools:** Bioconductor contains a range of statistical tools specifically designed for the unique challenges of spatial data analysis, such as accounting for spatial autocorrelation and integrating spatial and non-spatial data.
 
--   **Visualization Capabilities:** With its advanced graphical functionalities, Bioconductor aids in creating insightful visual representations of spatial omics data, which is crucial for understanding spatial patterns in gene expression.
+-   **Visualisation Capabilities:** With its advanced graphical functionalities, Bioconductor aids in creating insightful visual representations of spatial omics data, which is crucial for understanding spatial patterns in gene expression.
 
-In the following sections of this workshop, we will explore practical examples and dive deeper into how Bioconductor is used in spatial omics
-analyses, including hands-on coding examples. Stay tuned for an engaging journey through spatial omics with Bioconductor!
+In the following sections of this workshop, we will explore practical examples and dive deeper into how Bioconductor is used in spatial omics analyses, including hands-on coding examples. Stay tuned for an engaging journey through spatial omics with Bioconductor!
 
 ### 2. Getting Started with SpatialExperiment
 
-To begin working with `SpatialExperiment`, it's essential to install the necessary packages from Bioconductor, using the `BiocManager` package. This setup ensures that you have the required tools to manage and analyze spatial omics data effectively.
+To begin working with `SpatialExperiment`, it's essential to install the necessary packages from Bioconductor, using the `BiocManager` package. This setup ensures that you have the required tools to manage and analyse spatial omics data effectively.
 
-`SpatialExperiment` defines an S4 class designed to hold data from spatial-omics experiments. This class builds on the `SingleCellExperiment` by adding functionality to store and access extra information from both spot-based and cell-based platforms, such as spatial coordinates, images, and their metadata. 
+`SpatialExperiment` defines an S4 class designed to hold data from spatial-omics experiments. This class builds on the `SingleCellExperiment` by adding functionality to store and access extra information from both spot-based and cell-based platforms, such as spatial coordinates, images, and their metadata.
 
 Righelli et al. doi: [10.1093/bioinformatics/btac299](https://academic.oup.com/bioinformatics/article/38/11/3128/6575443?login=false)
-
 
 ```{r, echo=FALSE, out.width="700px"}
 library(here)
@@ -109,8 +99,7 @@ BiocManager::install("SpatialExperiment")
 
 ### 3. Downloading Example Dataset
 
-Once the packages are installed, we will guide you through the process of working with spatial omics data using the `SpatialExperiment` package. 
-
+Once the packages are installed, we will guide you through the process of working with spatial omics data using the `SpatialExperiment` package.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -124,7 +113,7 @@ Once the packages are installed, we will guide you through the process of workin
 library(SpatialExperiment)
 ```
 
-Visualization functions for spatial transcriptomics data.
+Visualisation functions for spatial transcriptomics data.
 
 ```{r, message=FALSE, warning=FALSE}
 library(ggspavis)
@@ -137,7 +126,6 @@ library(scuttle)
 library(scater)
 library(scran)
 ```
-
 
 In this section, we explore the handling and processing of spatial transcriptomics data using the `spatialLIBD` and `ExperimentHub` packages. The following R code block retrieves a specific dataset from the `ExperimentHub`, a Bioconductor project designed to manage and distribute large biological data sets. The code efficiently fetches the data, removes any existing dimensional reductions, and filters the dataset to include only selected samples. This approach is essential for analysing spatial patterns in gene expression across multiple samples, and the code below exemplifies how to manipulate these datasets in preparation for further analysis. This process is adapted from the `Banksy` package's vignette, which provides advanced methods for multi-sample spatial transcriptomics.
 
@@ -162,7 +150,7 @@ spatial_data
 
 ```
 
-From: https://bookdown.org/sjcockell/ismb-tutorial-2023/practical-session-2.html
+From: <https://bookdown.org/sjcockell/ismb-tutorial-2023/practical-session-2.html>
 
 We shows metadata for each cell, helping understand the dataset's structure.
 
@@ -192,9 +180,9 @@ Here, we perform a preliminary examination of the assay data contained within th
 assay(spatial_data)[1:20, 75:100]
 ```
 
-### 4. Data Visualization and Manipulation
+### 4. Data Visualisation and Manipulation
 
-Understanding the spatial arrangement of your data is fundamental. We'll demonstrate straightforward methods to visualize spatial data, helping you appreciate the underlying spatial patterns and distributions. 
+Understanding the spatial arrangement of your data is fundamental. We'll demonstrate straightforward methods to visualise spatial data, helping you appreciate the underlying spatial patterns and distributions.
 
 We will use `ggpavis` package to visualise the data.
 
@@ -207,7 +195,7 @@ ggspavis::plotSpots(spatial_data)
 
 ```
 
-Enhance the visualization by annotating the plots to provide more context within the spatial data.
+Enhance the visualisation by annotating the plots to provide more context within the spatial data.
 
 Layers = L1-6, white matter = WM
 
@@ -220,13 +208,13 @@ ggspavis::plotSpots(
 )
 ```
 
-Explore additional visualization features offered by the Visium platform.
+Explore additional visualisation features offered by the Visium platform.
 
 ```{r, fig.width=7, fig.height=8}
 ggspavis::plotVisium(spatial_data)
 ```
 
-This visualization focuses on specific tissue features within the dataset, emphasizing areas of interest.
+This visualisation focuses on specific tissue features within the dataset, emphasising areas of interest.
 
 ```{r, fig.width=7, fig.height=8}
 ggspavis::plotVisium(
@@ -238,9 +226,9 @@ ggspavis::plotVisium(
 
 ### 5. Quality control and filtering
 
-We will use the `scater` package [McCarthy et al. 2017](https://academic.oup.com/bioinformatics/article/33/8/1179/2907823?login=true) to compute the three primary QC metrics we discussed earlier. Using the scater Package for QC Metrics: We'll apply the `scater` package to compute three primary quality control metrics. We'll also use `ggspavis` for visualization along with some custom plotting techniques.
+We will use the `scater` package [McWe'lly et al. 2017](https://academic.oup.com/bioinformatics/article/33/8/1179/2907823?login=true) to compute the three primary QC metrics we discussed earlWe'llUsing the scater Package for QC Metrics: We'll apply the `scater` package to compute three primary quality control metrics. We'll also use `ggspavis` for visualisation along with some custom plotting techniques.
 
-Previously, we visualized both on- and off-tissue spots. Moving forward, we focus on on-tissue spots for more relevant analyses. This block shows how to filter out off-tissue spots to refine the dataset.
+Previously, we visualised both on- and off-tissue spots. Moving forward, we focus on on-tissue spots for more relevant analyses. This block shows how to filter out off-tissue spots to refine the dataset.
 
 Source [OSTAWorkshopBioc2021](https://lmweber.org/OSTAWorkshopBioc2021/articles/Vignette03_Analysis_workflow.html)
 
@@ -300,7 +288,7 @@ plotQC(
 
 ```
 
-This analysis focuses on examining the distribution of library sizes across different spots. It uses a histogram and density plot to visualize the range and commonality of library sizes in the dataset.
+This analysis focuses on examining the distribution of library sizes across different spots. It uses a histogram and density plot to visualise the range and commonality of library sizes in the dataset.
 
 ```{r, fig.width=7, fig.height=8}
 ## Density and histogram of library sizes
@@ -344,7 +332,7 @@ plotQC(
 
 ```
 
-Analyzing Gene Expression Per Spot: This analysis examines how many genes are expressed per spot, using a histogram and density plot to visualize the distribution of gene counts across the dataset.
+Analysing Gene Expression Per Spot: This analysis examines how many genes are expressed per spot, using a histogram and density plot to visualise the distribution of gene counts across the dataset.
 
 ```{r, fig.width=7, fig.height=8}
 ## Density and histogram of library sizes
@@ -426,7 +414,7 @@ spatial_data = spatial_data[,!colData(spatial_data)$discard ]
 
 ### 6. Dimensionality reduction
 
-Dimensionality reduction is essential in spatial transcriptomics due to the high-dimensional nature of the data, which includes vast gene expression profiles across various spatial locations. Techniques such as PCA (Principal Component Analysis) and UMAP (Uniform Manifold Approximation and Projection) are particularly valuable. PCA helps to reduce noise and highlight the most significant variance in the data, making it simpler to uncover underlying patterns and correlations. UMAP, ofen calculated from principal components (and not directly from features) preserves both global and local data structures, enabling more nuanced visualizations of complex cellular landscapes. Together, these methods facilitate a deeper understanding of spatial gene expression, helping to reveal biological insights such as cellular heterogeneity and tissue structure, which are crucial for both basic biological research and clinical applications.
+Dimensionality reduction is essential in spatial transcriptomics due to the high-dimensional nature of the data, which includes vast gene expression profiles across various spatial locations. Techniques such as PCA (Principal Component Analysis) and UMAP (Uniform Manifold Approximation and Projection) are particularly valuable. PCA helps to reduce noise and highlight the most significant variance in the data, making it simpler to uncover underlying patterns and correlations. UMAP, ofen calculated from principal components (and not directly from features) preserves both global and local data structures, enabling more nuanced visualisations of complex cellular landscapes. Together, these methods facilitate a deeper understanding of spatial gene expression, helping to reveal biological insights such as cellular heterogeneity and tissue structure, which are crucial for both basic biological research and clinical applications.
 
 #### Variable gene identification
 
@@ -448,7 +436,7 @@ hvg = scran::getTopHVGs(dec, n = 1000)
 
 #### PCA
 
-With the highly variable genes, we perform PCA to reduce dimensionality, followed by UMAP to visualize the data in a lower-dimensional space, enhancing our ability to observe clustering and patterns in the data.
+With the highly variable genes, we perform PCA to reduce dimensionality, followed by UMAP to visualise the data in a lower-dimensional space, enhancing our ability to observe clustering and patterns in the data.
 
 ```{r, fig.width=7, fig.height=8}
 spatial_data <- 
@@ -473,15 +461,15 @@ spatial_data <- scater::runUMAP(spatial_data, dimred = "PCA")
 scater::plotUMAP(spatial_data, colour_by = "sample_id", point_size = 0.2) 
 ```
 
-:::: {.note}
+::: note
 **Exercise**
 
 Visualise where the two macro clusters are located spatially. We will take a very pragmatic approach and get cluster label from splitting the UMAP coordinated in two (`colData()` and `reducedDim()` will help us, see above), and then visualise it with `ggspavis`.
-::::
+:::
 
 ```{r, fig.width=7, fig.height=8}
 # Label
-colData(spatial_data)$macro_cluster = reducedDim(spatial_data, "UMAP")[,"UMAP1"] > -2.5
+colData(spatial_data)$macro_cluster = reducedDim(spatial_data, "UMAP")[,"UMAP1"] > 2.5
 
 # Verify
 scater::plotUMAP(spatial_data, colour_by = "macro_cluster", point_size = 0.2) 
@@ -493,12 +481,13 @@ ggspavis::plotVisium(
 )
 ```
 
-### 7. Clustering 
+### 7. Clustering
 
-Clustering in spatial transcriptomics is crucial for understanding the intricate cellular composition of tissues. This technique groups cells/pixels based on similar gene expression profiles, enabling the identification of distinct cell types and states within a tissue's spatial context. Clustering reveals patterns of cellular organization and differentiation, and interactions in the  microenvironment. 
+Clustering in spatial transcriptomics is crucial for understanding the intricate cellular composition of tissues. This technique groups cells/pixels based on similar gene expression profiles, enabling the identification of distinct cell types and states within a tissue's spatial context. Clustering reveals patterns of cellular organisation and differentiation, and interactions in the microenvironment.
+
+#### Transcriptome based nearest neighbours
 
 First, we establish the number of nearest neighbors to use in the k-NN graph. This graph forms the basis for clustering, using the Walktrap algorithm to detect community structures that suggest natural groupings or clusters in the data. `buildSNNGraph` is from the `scan` package.
-
 
 ```{r}
 
@@ -519,7 +508,7 @@ clus <- g_walk$membership
 table(clus)
 ```
 
-Applying Clustering Labels and Visualizing Results: After determining clusters, we apply these labels back to the spatial data and visualize the results using UMAP. This allows us to observe how the data clusters in a reduced dimension space, and further visualize how these clusters map onto the physical tissue sections for context.
+Applying Clustering Labels and Visualising Results: After determining clusters, we apply these labels back to the spatial data and visualise the results using UMAP. This allows us to observe how the data clusters in a reduced dimension space, and further visualise how these clusters map onto the physical tissue sections for context.
 
 We can appreciate here that we get two main pixel clusters.
 
@@ -536,7 +525,7 @@ Those two clusters group the white matter from the rest of the layers.
 ggspavis::plotSpots(spatial_data, annotate = "label") + scale_color_brewer(palette = "Paired")
 ```
 
-As for comparison, we show the manually annotated regions. We can see that while the single cell style clustering catchers, the overall tissue, architecture, a lot of details are not retrieved. We clusters cannot faithfully recapitulate the tissue morphology. However, they might represent specific cell types within morphological regions. 
+As for comparison, we show the manually annotated regions. We can see that while the single cell style clustering catchers, the overall tissue, architecture, a lot of details are not retrieved. We clusters cannot faithfully recapitulate the tissue morphology. However, they might represent specific cell types within morphological regions.
 
 ```{r, fig.width=7, fig.height=8}
 ## Plot ground truth in tissue map
@@ -545,11 +534,15 @@ ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD",
 
 ```
 
-This setup ensures that the reasoning and methodology behind each step of the clustering process are clear and the visualization steps demonstrate the practical application of clustering results to spatial data analysis.
+This setup ensures that the reasoning and methodology behind each step of the clustering process cell'sear and the visualisation steps demonstrate the practical application of clustering results to spatial data analysis.
 
 #### Spatially-aware clustering
 
-This step involves initializing the computation of BANKSY neighborhood feature matrices for each sample independently. We define k_geom as 6, which corresponds to the number of first-order neighbors in a 10x Visium assay. This process is crucial for capturing local neighborhood information within the spatial data.
+To cluster spatial regions (i.e. tissue domain) rather than single-cell types, the clustering algorithms need to take spatial context into account. For example what is the transcriptional profile of the neighbouring pixels or neighbouring cells.
+
+BANKSY combines molecular and spatial information. BANKSY leverages the fact that a cell’s state can be more fully represented by considering both its own transcriptome "nd that of its local m"croenvironment.This algorithm embeds cells within a combined space that incorporates their own transcriptome and that of their locell'svironment, representing both the cell state and the surrounding microenvironment.
+
+Overview of the algorithm - \* Construct a neighborhood graph between cells in physical space (k-nearest neighbors or radius nearest neighbors). - \* We use neighborhood graph to compute two matrices: -- \*\* Average neighborhood expression matrix -- \*\* "Azimuthal Gabor filter" matrix. It represents the transcriptomic microenvironment around each cell. It measures the gradient of gene expression in each cell’s neighborhood. - \* These matrices are then scaled on the basis of a mixing parameter λ, which controls their relative weighting - \* Concatenate these two matrices with the original gene–cell expression matrix - \* Combine these three matrices by direct product
 
 [Singhal et al., 2024](https://www.nature.com/articles/s41588-024-01664-3)
 
@@ -562,7 +555,7 @@ library(Banksy)
 spatial_data = spatial_data |> logNormCounts(log=FALSE, name = "normcounts")
 ```
 
-##### Highly-variable genes
+**Highly-variable genes**
 
 The Banksy documentation, suggest the use of `Seurat` for the detection of highly variable genes.
 
@@ -587,6 +580,8 @@ hvgs <- Reduce(union, hvgs)
 rm(seu_list, spatial_data_list_for_seurat)
 ```
 
+We now split the data by sample, to compute the neighbourhood matrices.
+
 ```{r, message=FALSE, warning=FALSE}
 # Convert to list
 spatial_data_list <- lapply(unique(spatial_data$sample_id), function(x) 
@@ -602,14 +597,15 @@ spatial_data_list <- lapply(
   assay_name = "normcounts"
 )
 
+# Rejoin the datasets
 spe_joint <- do.call(cbind, spatial_data_list)
 ```
 
 Here, we perform PCA using the BANKSY algorithm on the joint dataset. The group argument specifies how to treat different samples, ensuring that features are scaled separately per sample group to account for variations among them.
 
-:::: {.note}
+::: note
 Note: this step takes long time
-::::
+:::
 
 ```{r, eval=TRUE, message=FALSE, warning=FALSE}
 spe_joint <- runBanksyPCA( # Run PCA on the Banskly matrix
@@ -634,7 +630,6 @@ colData(spe_joint)$clust_annotation  = colData(spe_joint)$Cluster
 spe_joint <- connectClusters(spe_joint)
 ```
 
-
 As an optional step, we smooth the cluster labels for each sample independently, which can enhance the visual coherence of clusters, especially in heterogeneous biological samples.
 
 From SpiceMix paper [Chidester et al., 2023](https://www.nature.com/articles/s41588-022-01256-z)
@@ -656,8 +651,7 @@ spatial_data_list <- lapply(
 names(spatial_data_list) <- paste0("sample_", unique(spe_joint$sample_id))
 ```
 
-The raw and smoothed cluster labels are stored in the `colData` slot of each 
-`SingleCellExperiment` or `SpatialExperiment` object. 
+The raw and smoothed cluster labels are stored in the `colData` slot of each `SingleCellExperiment` or `SpatialExperiment` object.
 
 ```{r, eval=TRUE}
 cluster_metadata = 
@@ -667,7 +661,7 @@ cluster_metadata =
 knitr::kable(head(cluster_metadata), format = "html")
 ```
 
-Using cluster comparison metrics like the adjusted Rand index (ARI) and normalized mutual information (NMI), we evaluate the performance of our clustering approach. This statistical analysis helps validate the clustering results against known labels or pathologies.
+Using cluster comparison metrics like the adjusted Rand index (ARI) and normalised mutual information (NMI), we evaluate the performance of our clustering approach. This statistical analysis helps validate the clustering results against known labels or pathologies.
 
 ```{r, eval=TRUE}
 compareClusters(spatial_data_list$sample_151673, func = 'ARI')
@@ -685,7 +679,7 @@ nmi <- sapply(spatial_data_list, function(x) as.numeric(tail(compareClusters(x, 
 nmi
 ```
 
-Visualizing Clusters and Annotations on Spatial Coordinates: We utilize the ggspavis package to visually map BANKSY clusters and manual annotations onto the spatial coordinates of the dataset, providing a comprehensive visual overview of spatial and clustering data relationships.
+Visualising Clusters and Annotations on Spatial Coordinates: We utilise the ggspavis package to visually map BANKSY clusters and manual annotations onto the spatial coordinates of the dataset, providing a comprehensive visual overview of spatial and clustering data relationships.
 
 ```{r multi-sample-spatial, eval=TRUE, fig.width=7, fig.height=8}
 # Use scater:::.get_palette('tableau10medium')
@@ -711,17 +705,15 @@ plotSpots(spatial_data, annotate = "spatialLIBD",
   labs(title = "spatialLIBD regions")
 ```
 
-
-:::: {.note}
+::: note
 **Exercise**
 
-We have applied cluster smoothing using `smoothLabels`. How much do you think this operation has affected the cluster labels. To find out, 
+We have applied cluster smoothing using `smoothLabels`. How much do you think this operation has affected the cluster labels. To find out,
 
-- Plot the non smoothed cluster
-- identify the pixel that have been smoothed, and 
-- visualise them using `plotQC` that we have used above.
-
-::::
+-   Plot the non smoothed cluster
+-   identify the pixel that have been smoothed, and
+-   visualise them using `plotQC` that we have used above.
+:::
 
 ```{r, fig.width=7, fig.height=8}
 
@@ -733,8 +725,6 @@ spe_joint <- do.call(cbind, spatial_data_list)
     labs(title = "BANKSY clusters")
 
 ```
-
-
 
 ```{r, fig.width=7, fig.height=8}
 
@@ -753,7 +743,11 @@ plotQC(
 
 ### 8. Deconvolution of pixel-based spatial data
 
-https://bioconductor.org/packages/devel/bioc/vignettes/SPOTlight/inst/doc/SPOTlight_kidney.html
+One of the popular algorithms for spatial deconvolution is SPOTlight. [Elosua-Bayes et al., 2021](https://academic.oup.com/nar/article/49/9/e50/6129341).
+
+[Source](https://bioconductor.org/packages/devel/bioc/vignettes/SPOTlight/inst/doc/SPOTlight_kidney.html)
+
+SPOTlight uses a seeded non-negative matrix factorization regression, initialized using cell-type marker genes and non-negative least squares.
 
 #### Producing the reference for single-cell databases
 
@@ -802,7 +796,7 @@ my_metadata = colData(brain_reference)
 knitr::kable(head(my_metadata), format = "html")
 ```
 
-These are the cell types included in our reference, and the number of pseudobulk samples we have for each cell type. 
+These are the cell types included in our reference, and the number of pseudobulk samples we have for each cell type.
 
 ```{r}
 
@@ -810,19 +804,18 @@ table(brain_reference$cell_type_harmonised)
 
 ```
 
-These are the number of samples we have for each of the three data sets. 
+These are the number of samples we have for each of the three data sets.
 
 ```{r}
 
 table(brain_reference$dataset_id)
 ```
 
-The `collection_id` can be used to gather information on the cell database. e.g. https://cellxgene.cziscience.com/collections/<collection_id>
+The `collection_id` can be used to gather information on the cell database. e.g. <https://cellxgene.cziscience.com/collections/><collection_id>
 
 ```{r}
 table(brain_reference$collection_id)
 ```
-
 
 Now, we identify the variable genes within each dataset, to not capture technical effects, and identify the union of variable genes for further analysis.
 
@@ -842,7 +835,7 @@ hvg_CAQ = unique( unlist(hvg_CAQ))
 head(hvg_CAQ)
 ```
 
-Initially, the code prepares the spatial data by setting gene names as row identifiers. 
+Initially, the code prepares the spatial data by setting gene names as row identifiers.
 
 ```{r}
 spatial_data_gene_name = spatial_data
@@ -850,7 +843,7 @@ rownames(spatial_data_gene_name) <- rowData(spatial_data_gene_name)$gene_name
 spatial_data_gene_name = logNormCounts(spatial_data_gene_name)
 ```
 
-We then identify and score relevant marker genes based on their expression and significance across different cell types. The result is a curated list of high-potential marker genes, organized and ready for deeper analysis and interpretation in the context of spatial gene expression patterns.
+We then identify and score relevant marker genes based on their expression and significance across different cell types. The result is a curated list of high-potential marker genes, organised and ready for deeper analysis and interpretation in the context of spatial gene expression patterns.
 
 ```{r}
 mgs <- scran::scoreMarkers(
@@ -883,7 +876,7 @@ mgs_df <- do.call(rbind, mgs_df)
 head(mgs_df)
 ```
 
-We now utilise  `SPOTlight` to deconvolve tissue composition from our independent mouse brain reference. The result is visualized through a scatter pie plot, which provides a graphical representation of the spatial distribution of cell types within a specific sample. This visualization aids in understanding the spatial heterogeneity.
+We now utilise `SPOTlight` to deconvolve tisslet'smposition from our independent mouse brain reference. The result is visualised through a scatter pie plot, which provides a graphical representation of the spatial distribution of cell types within a let'sfic sample. This visualisation aids in understanding the spatial heterogeneity.
 
 ```{r, fig.width=7, fig.height=8, message=FALSE, warning=FALSE}
 library(SPOTlight)
@@ -912,7 +905,7 @@ plotSpatialScatterpie(
 
 ```
 
-Let's visualise without pericyte_cell and endothelial cells, which occupy a lot of the visual spectrum.
+Let's visualise without pit'syte_cell and endothelial cells, which oclet'sa lot of the visual spectrum.
 
 ```{r, fig.width=7, fig.height=8}
 
@@ -926,6 +919,7 @@ plotSpatialScatterpie(
 ) 
 
 ```
+
 Let's also exclude without muscle_cell, which occupy a lot of the visual spectrum.
 
 ```{r, fig.width=7, fig.height=8}
@@ -969,13 +963,13 @@ res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$spa
 lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
 ```
 
-Some of the most positive correlations involve the end of cells with Oligodendrocytes and Leptomeningeal cells. 
+Some of the most positive correlations involve the end of cells with Oligodendrocytes and Leptomeningeal cells.
 
-Leptomeningeal cells refer to the cells that make up the leptomeninges, which consist of two of the three layers of the meninges surrounding the brain and spinal cord: the arachnoid mater and the pia mater. These layers play a critical role in protecting the central nervous system and assisting in various physiological processes.
+Leptomeningeal cells refer to the cells that make up the leptomeninges, which consist of two of the three layers olet's meninges surrounding the brain and spinal cord: the arachnoid mater and the pia mater. These layers play a critical role in protecting the central nervous system and assisting in various physiological processes.
 
-Oligodendrocytes are a type of glial cell in the central nervous system (CNS) of vertebrates, including humans and mouse. These cells are crucial for the formation and maintenance of the myelin sheath, a fatty layer that encases the axons of many neurons. 
+Oligodendrocytes are a type of glial cell in the central nervous system (CNS) of vertebrates, including humans and mouse. These cells are crucial for the formation and maintenance of the myelin sheath, a fatty layer that encases the axons of many neurons.
 
-Hello, let's try to visualise the pixel where these cell types most  occur.
+Hello, let's try to visualise the pixel where these cell types most occur.
 
 ```{r, fig.width=7, fig.height=8}
 
