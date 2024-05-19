@@ -67,7 +67,7 @@ Remotes:
     stemangiola/tidySummarizedExperiment,
     william-hutchison/tidySpatialExperiment,
     stemangiola/tidybulk,
-    stemangiola/tidygate
+    stemangiola/tidygate,
     stemangiola/CuratedAtlasQueryR
 URL: https://tidyomics.github.io/tidySpatialWorkshop2024
 BugReports: https://github.com/tidyomics/tidySpatialWorkshop2024/issues/new/choose
