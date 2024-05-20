@@ -1,0 +1,65 @@
+---
+title: "Sequencing assays"
+author:
+  - Stefano Mangiola, South Australian immunoGENomics Cancer Institute^[<mangiola.stefano@adelaide.edu.au>], Walter and Eliza Hall Institute^[<mangiola.s at wehi.edu.au>]
+output: rmarkdown::html_vignette
+# bibliography: "`r file.path(system.file(package='tidySpatialWorkshop2024', 'vignettes'), 'tidyomics.bib')`"
+vignette: >
+  %\VignetteIndexEntry{Sequencing assays}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+
+```
+
+
+::: note
+**Exercise 1.1**
+:::
+
+```{r, fig.width=7, fig.height=8, eval=FALSE}
+# Label
+colData(spatial_data)$macro_cluster = reducedDim(spatial_data, "UMAP")[,"UMAP1"] > 2.5
+
+# Verify
+scater::plotUMAP(spatial_data, colour_by = "macro_cluster", point_size = 0.2) 
+
+ggspavis::plotVisium(
+  spatial_data, 
+  annotate = "macro_cluster", 
+  highlight = "in_tissue"
+)
+```
+
+
+::: note
+**Exercise 1.2**
+:::
+
+```{r, fig.width=7, fig.height=8, eval=FALSE}
+
+spe_joint <- do.call(cbind, spatial_data_list)
+
+
+ ggspavis::plotSpots(spe_joint, annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), pal = pal) +
+    facet_wrap(~sample_id) +
+    theme(legend.position = "none") +
+    labs(title = "BANKSY clusters")
+
+```
+
+```{r, fig.width=7, fig.height=8, eval=FALSE}
+
+spe_joint$has_changed =  !spe_joint$clust_M0_lam0.2_k50_res0.7 == spe_joint$clust_M0_lam0.2_k50_res0.7_smooth
+
+plotSpotQC(
+  spe_joint, 
+  plot_type = "spot",  
+  annotate = "has_changed", 
+) + 
+  facet_wrap(~sample_id)
+```
+
