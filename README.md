@@ -1,4 +1,4 @@
-# spatialOmicsWorkshop2024
+# tidySpatialWorkshop2024
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
@@ -43,7 +43,7 @@ BiocManager::install("ggcorrplot")
 BiocManager::install("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE, force=TRUE)
 
 # To view vignette
-library(spatialOmicsWorkshop2024)
+library(tidySpatialWorkshop2024)
 vignette("Introduction")
 ```
 
