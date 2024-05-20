@@ -46,9 +46,14 @@ You can view the material at the workshop webpage
 
 [here](https://tidyomics.github.io/tidySpatialWorkshop2024/articles/main.html).
 
-### Installation
+## Workshop package installation 
+
+If you want to install the packages and material post-workshop, the
+instructions are below. The workshop is designed for R `4.4` and
+Bioconductor 3.19. 
 
 ```{r, eval=FALSE}
+
 # Install workshop package
 #install.packages('BiocManager')
 BiocManager::install("tidyomics/tidySpatialWorkshop2024", dependencies = TRUE)
@@ -61,14 +66,28 @@ BiocManager::install(c("lmweber/ggspavis",
                        "stemangiola/tidygate", 
                        "stemangiola/CuratedAtlasQueryR"), 
                      update = FALSE)
+                     
+BiocManager::install("ggcorrplot")
     
 # Then build the vignettes
-BiocManager::install("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE, force = TRUE)
+BiocManager::install("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE, force=TRUE)
 
 # To view vignette
 library(spatialOmicsWorkshop2024)
 vignette("Introduction")
 ```
+
+## Interactive execution of the vignettes
+
+From command line, and enter the tidySpatialWorkshop2024 directory.
+
+```
+# Open the command line
+git clone git@github.com:tidyomics/tidySpatialWorkshop2024.git
+
+```
+
+Alternatively download the [git zipped package](https://github.com/tidyomics/tidySpatialWorkshop2024/archive/refs/heads/devel.zip). Uncompress it. And enter the directory. 
 
 # Announcements
 

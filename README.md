@@ -47,6 +47,19 @@ library(spatialOmicsWorkshop2024)
 vignette("Introduction")
 ```
 
+## Interactive execution of the vignettes
+
+From command line, and enter the tidySpatialWorkshop2024 directory.
+
+```
+# Open the command line
+git clone git@github.com:tidyomics/tidySpatialWorkshop2024.git
+
+```
+
+Alternatively download the [git zipped package](https://github.com/tidyomics/tidySpatialWorkshop2024/archive/refs/heads/devel.zip). Uncompress it. And enter the directory. 
+
+
 To run the code, you could then copy and paste the code from the workshop vignette or 
 [R markdown file](https://github.com/tidyomics/tidySpatialWorkshop2024/blob/devel/vignettes/Session_1_sequencing_assays.Rmd)
 into a new R Markdown file on your computer. 
