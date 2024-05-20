@@ -17,6 +17,8 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 
 # Session 1: Spatial analyses of sequencing data
 
+Web rendering: https://rpubs.com/mangiolas/1186971
+
 ### Objective
 
 Introduce the Bioconductor framework with a focus on the `SpatialExperiment` package. Guide participants through installation, data acquisition, and basic data manipulation and visualisation.
@@ -687,22 +689,19 @@ cluster_metadata =
 knitr::kable(head(cluster_metadata), format = "html")
 ```
 
-Using cluster comparison metrics like the adjusted Rand index (ARI) and normalised mutual information (NMI), we evaluate the performance of our clustering approach. This statistical analysis helps validate the clustering results against known labels or pathologies.
+Using cluster comparison metrics like the adjusted Rand index (ARI) we evaluate the performance of our clustering approach. This statistical analysis helps validate the clustering results against known labels or pathologies.
+
+The Adjusted Rand Index (ARI) is a measure of the similarity between two data clusterings. Measures degree of overlapping between two partitions.
 
 ```{r, eval=TRUE}
 compareClusters(spatial_data_list$sample_151673, func = 'ARI')
 ```
 
-Calculating and Displaying Clustering Metrics for Each Sample: We calculate the ARI and NMI for each sample to assess the consistency and accuracy of our clustering across different samples.
+We calculate the ARI for each sample to assess the consistency and accuracy of our clustering across different samples.
 
 ```{r, eval=TRUE}
 ari <- sapply(spatial_data_list, function(x) as.numeric(tail(compareClusters(x, func = "ARI")[, 1], n = 1)))
 ari
-```
-
-```{r, eval=TRUE}
-nmi <- sapply(spatial_data_list, function(x) as.numeric(tail(compareClusters(x, func = "NMI")[, 1], n = 1)))
-nmi
 ```
 
 Visualising Clusters and Annotations on Spatial Coordinates: We utilise the ggspavis package to visually map BANKSY clusters and manual annotations onto the spatial coordinates of the dataset, providing a comprehensive visual overview of spatial and clustering data relationships.
