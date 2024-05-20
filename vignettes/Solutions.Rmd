@@ -63,3 +63,42 @@ plotSpotQC(
   facet_wrap(~sample_id)
 ```
 
+:::: {.note}
+**Excercise 2.1**
+::::
+
+```{r}
+library(tidySummarizedExperiment)
+library(tidybulk)
+  
+differential_analysis = 
+  spatial_data |> 
+  mutate(
+    dead = 
+      
+      # Stringent threshold
+      subsets_mito_percent > 20 |
+      sum < 700 |
+      detected < 500
+  ) |> 
+  aggregate_cells(c(sample_id, spatialLIBD, dead)) |> 
+  keep_abundant(factor_of_interest = c(dead)) |> 
+  nest(data = - spatialLIBD) |> 
+  
+  # filter regions having both alive and dead cells
+  filter(  map_int(data, ~ .x |> distinct(sample_id, dead) |> nrow() ) == 6 ) |>
+  mutate(data = map(
+    data,
+    test_differential_abundance,
+    ~ dead + sample_id,
+    method = "edgeR_quasi_likelihood", 
+    test_above_log2_fold_change = log(2)
+  )) 
+
+differential_analysis |> 
+  mutate(data = map(data, pivot_transcript)) |> 
+  unnest(data) |> 
+  filter(FDR<0.05) 
+
+#  tidybulk::test_differential_abundance(~ dead + sample_id + (1 | spatialLIBD), method = "glmmseq_lme4")
+```

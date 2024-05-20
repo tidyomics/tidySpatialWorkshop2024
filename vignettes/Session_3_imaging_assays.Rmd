@@ -279,13 +279,6 @@ tx_spe_sample_1 |>
 
 ```
 
-### 3. Cell type caracterisation
-
-```{r}
-
-
-```
-
 ### 4. Neighborhood analyses
 
 
@@ -295,12 +288,12 @@ https://www.bioconductor.org/packages/release/bioc/vignettes/hoodscanR/inst/doc/
 https://divingintogeneticsandgenomics.com/post/neighborhood-cellular-niches-analysis-with-spatial-transcriptome-data-in-seurat-and-bioconductor/
 
 :::: {.note}
-**Excercise**
+**Exercise**
 
 **Spatial-aware clustering:** Apply the spatial aware clustering method BANKSY. Taking as example the code run for session 2.
 ::::
 
-### 5. Neighborhood analysis
+
 
 ```{r, fig.width=7, fig.height=8, message=FALSE}
 
@@ -368,7 +361,7 @@ tx_spe_sample_1 |>
 ```
 
 
-### 6. Supplementary: `MoleculeExperiment` package
+### 5. Supplementary: `MoleculeExperiment` package
 
 https://www.bioconductor.org/packages/release/bioc/vignettes/MoleculeExperiment/inst/doc/MoleculeExperiment.html
 

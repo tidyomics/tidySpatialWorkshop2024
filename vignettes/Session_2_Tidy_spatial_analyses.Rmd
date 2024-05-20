@@ -590,7 +590,7 @@ spatial_data_filtered |>
 As you can appreciate, the relationship between the number of genes, probed Purcell and their mitochondrial prescription abundance it's quite  consistent.
 
 :::: {.note}
-**Excercise**
+**Excercise 2.1**
 
 To to practice the use of `tidyomics` on spatial data, we propose a few exercises that connect manipulation, calculations and visualisation. These exercises are just meant to be simple use cases that exploit tidy R streamlined language.
 
@@ -600,43 +600,6 @@ We assume that the cells we filtered as non-alive or damaged, characterised by b
 Use `tidyomic`s/`tidyverse` tools to label dead cells and perform differential expression within each region. Some of the comments you can use are: `mutate`, `nest`, `aggregate_cells`.
 ::::
 
-**Solution**
-
-```{r}
-library(tidySummarizedExperiment)
-library(tidybulk)
-  
-differential_analysis = 
-  spatial_data |> 
-  mutate(
-    dead = 
-      
-      # Stringent threshold
-      subsets_mito_percent > 20 |
-      sum < 700 |
-      detected < 500
-  ) |> 
-  aggregate_cells(c(sample_id, spatialLIBD, dead)) |> 
-  keep_abundant(factor_of_interest = c(dead)) |> 
-  nest(data = - spatialLIBD) |> 
-  
-  # filter regions having both alive and dead cells
-  filter(  map_int(data, ~ .x |> distinct(sample_id, dead) |> nrow() ) == 6 ) |>
-  mutate(data = map(
-    data,
-    test_differential_abundance,
-    ~ dead + sample_id,
-    method = "edgeR_quasi_likelihood", 
-    test_above_log2_fold_change = log(2)
-  )) 
-
-differential_analysis |> 
-  mutate(data = map(data, pivot_transcript)) |> 
-  unnest(data) |> 
-  filter(FDR<0.05) 
-
-#  tidybulk::test_differential_abundance(~ dead + sample_id + (1 | spatialLIBD), method = "glmmseq_lme4")
-```
 
 **Session Information**
 
