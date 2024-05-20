@@ -36,9 +36,11 @@ BiocManager::install(c("lmweber/ggspavis",
                        "stemangiola/tidygate", 
                        "stemangiola/CuratedAtlasQueryR"), 
                      update = FALSE)
+                     
+BiocManager::install("ggcorrplot")
     
 # Then build the vignettes
-devtools::build_vignettes(pkg = "tidySpatialWorkshop2024")
+BiocManager::install("tidyomics/tidySpatialWorkshop2024", build_vignettes = TRUE, force=TRUE)
 
 # To view vignette
 library(spatialOmicsWorkshop2024)
