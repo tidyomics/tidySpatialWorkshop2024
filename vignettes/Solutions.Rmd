@@ -99,8 +99,6 @@ differential_analysis |>
   mutate(data = map(data, pivot_transcript)) |> 
   unnest(data) |> 
   filter(FDR<0.05) 
-
-#  tidybulk::test_differential_abundance(~ dead + sample_id + (1 | spatialLIBD), method = "glmmseq_lme4")
 ```
 
 
