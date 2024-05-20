@@ -193,7 +193,7 @@ Understanding the spatial arrangement of your data is fundamental. We'll demonst
 
 We will use `ggpavis` package to visualise the data.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 # image data
 imgData(spatial_data)
 
@@ -207,7 +207,7 @@ Enhance the visualisation by annotating the plots to provide more context within
 
 Layers = L1-6, white matter = WM
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 
 # plot spots with annotation
 ggspavis::plotSpots(
@@ -219,13 +219,13 @@ ggspavis::plotSpots(
 
 Explore additional visualisation features offered by the Visium platform, exposing the H&E (hematoxylin and eosin) image.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ggspavis::plotVisium(spatial_data)
 ```
 
 This visualisation focuses on specific tissue features within the dataset, emphasising areas of interest.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ggspavis::plotVisium(
   spatial_data, 
   annotate = "spatialLIBD", 
@@ -285,7 +285,7 @@ table(qc_mitochondrial_transcription)
 
 After applying the QC metrics, it’s crucial to visually assess their impact. This step involves checking the spatial pattern of the spots removed based on high mitochondrial transcription, helping us understand the distribution and quality of the remaining dataset.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Add threshold in colData
 colData(spatial_data)$qc_mitochondrial_transcription <- qc_mitochondrial_transcription
 
@@ -303,7 +303,7 @@ plotSpotQC(
 
 This analysis focuses on examining the distribution of library sizes across different spots. It uses a histogram and density plot to visualise the range and commonality of library sizes in the dataset.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Density and histogram of library sizes
 data.frame(colData(spatial_data)) |> 
   ggplot(aes(x = sum)) +
@@ -327,7 +327,7 @@ table(qc_total_counts)
 
 Incorporating Library Size Threshold in Dataset: This step involves adding the library size threshold to the dataset’s metadata and examining the spatial pattern of the spots that have been removed based on this criterion.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 
 ## Add threshold in colData
 colData(spatial_data)$qc_total_counts <- qc_total_counts
@@ -347,7 +347,7 @@ plotSpotQC(
 
 This analysis examines how many genes are expressed per spot, using a histogram and density plot to visualise the distribution of gene counts across the dataset.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Density and histogram of library sizes
 data.frame(colData(spatial_data) ) |> 
   ggplot(aes(x = detected)) +
@@ -371,7 +371,7 @@ table(qc_detected_genes)
 
 Incorporating Gene Expression Threshold in Dataset: After setting the gene expression threshold, it is added to the dataset's metadata. The spatial pattern of spots removed based on this threshold is then examined.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Add threshold in colData
 colData(spatial_data)$qc_detected_genes <- qc_detected_genes
 
@@ -387,7 +387,7 @@ plotSpotQC(
 
 Exploring the Relationship Between Library Size and Number of Genes Detected: This analysis explores the correlation between library size and the number of genes detected in each spot, providing insights into data quality and sequencing depth.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Density and histogram of library sizes
 data.frame(colData(spatial_data)) |> 
   ggplot(aes(sum, detected)) +
@@ -403,7 +403,7 @@ data.frame(colData(spatial_data)) |>
 
 After applying all QC filters, this block combines them and stores the results in the dataset. The spatial patterns of all discarded spots are then reviewed to ensure comprehensive quality control.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 
 ## Store the set in the object
 colData(spatial_data)$discard <- qc_total_counts | qc_detected_genes | qc_mitochondrial_transcription
@@ -430,7 +430,7 @@ Dimensionality reduction is essential in spatial transcriptomics due to the high
 
 #### Variable gene identification
 
-```{r, message=FALSE, warning=FALSE, fig.width=7, fig.height=8}
+```{r, message=FALSE, warning=FALSE, fig.width=3, fig.height=3}
 
 genes <- !grepl(pattern = "^Rp[l|s]|Mt", x = rownames(spatial_data))
 dec = scran::modelGeneVar(spatial_data, subset.row = genes) 
@@ -451,7 +451,7 @@ rowData(spatial_data[head(hvg),])[,c("gene_id", "gene_name")]
 
 With the highly variable genes, we perform PCA to reduce dimensionality, followed by UMAP to visualise the data in a lower-dimensional space, enhancing our ability to observe clustering and patterns in the data.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 spatial_data <- 
   spatial_data |> 
   scuttle::logNormCounts() |> 
@@ -463,9 +463,9 @@ reducedDimNames(spatial_data)
 reducedDim(spatial_data, "PCA")[1:5, 1:5]
 ```
 
-:::: note
+::: note
 As for single-cell data, we need to verify that there is not significant batch effect. If so we need to adjust for it (a.k.a. integration) before calculating principal component. Many adjustment methods to output adjusted principal components directly. 
-::::
+:::
 
 
 #### UMAP
@@ -474,14 +474,14 @@ You can appreciate that, in this case, selecting within-sample variable genes, w
 
 We can appreciate that there are no major batch effects across samples, and we don't see grouping driven by sample_id.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 set.seed(42)
 spatial_data <- scater::runUMAP(spatial_data, dimred = "PCA")
 
 scater::plotUMAP(spatial_data, colour_by = "sample_id", point_size = 0.2) 
 ```
 
-:::: note
+::: note
 **Exercise 1.1**
 
 Visualise where the two macro clusters are located spatially. We will take a very pragmatic approach and get cluster label from splitting the UMAP coordinated in two (`colData()` and `reducedDim()` will help us, see above), and then visualise it with `ggspavis`.
@@ -489,7 +489,7 @@ Visualise where the two macro clusters are located spatially. We will take a ver
 - Modify the `SpatialExperiment` object based on the UMAP1 dimension so to divide those 2 cluster
 - Visualise the UMAP colouring by the new labelling
 - Visualise the Visium slide colouring by the new labelling
-::::
+:::
 
 ### 7. Clustering
 
@@ -522,7 +522,7 @@ Applying Clustering Labels and Visualising Results: After determining clusters, 
 
 We can appreciate here that we get two main pixel clusters.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 colLabels(spatial_data) <- factor(clus)
 
 scater::plotUMAP(spatial_data, colour_by = "label") + scale_color_brewer(palette = "Paired")
@@ -530,7 +530,7 @@ scater::plotUMAP(spatial_data, colour_by = "label") + scale_color_brewer(palette
 
 Those two clusters group the white matter from the rest of the layers.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Plot in tissue map
 ggspavis::plotSpots(spatial_data, annotate = "label") + 
   facet_wrap(~sample_id) +
@@ -539,7 +539,7 @@ ggspavis::plotSpots(spatial_data, annotate = "label") +
 
 As for comparison, we show the manually annotated regions. We can see that while the single cell style clustering catchers, the overall tissue, architecture, a lot of details are not retrieved. We clusters cannot faithfully recapitulate the tissue morphology. However, they might represent specific cell types within morphological regions.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 ## Plot ground truth in tissue map
 ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
   facet_wrap(~sample_id) +
@@ -551,7 +551,7 @@ ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
 
 To cluster spatial regions (i.e. tissue domain) rather than single-cell types, the clustering algorithms need to take spatial context into account. For example what is the transcriptional profile of the neighbouring pixels or neighbouring cells.
 
-BANKSY combines molecular and spatial information. BANKSY leverages the fact that a cell’s state can be more fully represented by considering both its own transcriptome "nd that of its local m"croenvironment.This algorithm embeds cells within a combined space that incorporates their own transcriptome and that of their locell'svironment, representing both the cell state and the surrounding microenvironment.
+BANKSY combines molecular and spatial information. BANKSY leverages the fact that a cell’s state can be more fully represented by considering both its own transcriptome "nd that of its local microenvironment.This algorithm embeds cells within a combined space that incorporates their own transcriptome and that of their locell'svironment, representing both the cell state and the surrounding microenvironment.
 
 Overview of the algorithm 
 
@@ -631,9 +631,9 @@ spe_joint <- do.call(cbind, spatial_data_list)
 
 Here, we perform PCA using the BANKSY algorithm on the joint dataset. The group argument specifies how to treat different samples, ensuring that features are scaled separately per sample group to account for variations among them.
 
-:::: note
+::: note
 Note: this step takes long time
-::::
+:::
 
 ```{r, eval=TRUE, message=FALSE, warning=FALSE}
 spe_joint <- runBanksyPCA( # Run PCA on the Banskly matrix
@@ -706,7 +706,7 @@ ari
 
 Visualising Clusters and Annotations on Spatial Coordinates: We utilise the ggspavis package to visually map BANKSY clusters and manual annotations onto the spatial coordinates of the dataset, providing a comprehensive visual overview of spatial and clustering data relationships.
 
-```{r multi-sample-spatial, eval=TRUE, fig.width=7, fig.height=8}
+```{r multi-sample-spatial, eval=TRUE, fig.width=3, fig.height=3}
 # Use scater:::.get_palette('tableau10medium')
 library(cowplot)
 
@@ -724,7 +724,15 @@ pal <- c(
     theme(legend.position = "none") +
     labs(title = "BANKSY clusters")
  
-
+ ggspavis::plotSpots(
+   do.call(cbind, spatial_data_list), 
+   annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), 
+   pal = pal
+  ) +
+    facet_wrap(~sample_id) +
+    theme(legend.position = "none") +
+    labs(title = "BANKSY clusters")
+ 
 ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
   facet_wrap(~sample_id) +
   scale_color_manual(values = libd_layer_colors) +
@@ -732,7 +740,7 @@ ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
   labs(title = "spatialLIBD regions")
 ```
 
-:::: note
+::: note
 **Exercise 1.2**
 
 We have applied cluster smoothing using `smoothLabels`. How much do you think this operation has affected the cluster labels. To find out,
@@ -740,7 +748,7 @@ We have applied cluster smoothing using `smoothLabels`. How much do you think th
 -   Plot the non smoothed cluster
 -   identify the pixel that have been smoothed, and
 -   visualise them using `plotSpotQC` that we have used above.
-::::
+:::
 
 ### 8. Deconvolution of pixel-based spatial data
 
@@ -762,7 +770,7 @@ Mangiola et al., 2024 doi [doi.org/10.1101/2023.06.08.542671](https://www.biorxi
 knitr::include_graphics(here("inst/images/curated_atlas_query.png"))
 ```
 
-```{r, message=FALSE, warning=FALSE,  fig.width=7, fig.height=8}
+```{r, message=FALSE, warning=FALSE,  fig.width=3, fig.height=3}
 # Get reference
 library(CuratedAtlasQueryR)
 library(HDF5Array)
@@ -879,7 +887,7 @@ head(mgs_df)
 
 We now utilise `SPOTlight` to deconvolve tisslet'smposition from our independent mouse brain reference. The result is visualised through a scatter pie plot, which provides a graphical representation of the spatial distribution of cell types within a let'sfic sample. This visualisation aids in understanding the spatial heterogeneity.
 
-```{r, fig.width=7, fig.height=8, message=FALSE, warning=FALSE}
+```{r, fig.width=3, fig.height=3, message=FALSE, warning=FALSE}
 library(SPOTlight)
 
 res <- SPOTlight(
@@ -908,7 +916,7 @@ plotSpatialScatterpie(
 
 Let's visualise without pit'syte_cell and endothelial cells, which oclet'sa lot of the visual spectrum.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 
 plotSpatialScatterpie(
   x = spatial_data_gene_name[,cell_first_sample],
@@ -923,7 +931,7 @@ plotSpatialScatterpie(
 
 Let's also exclude without muscle_cell, which occupy a lot of the visual spectrum.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 
 plotSpatialScatterpie(
   x = spatial_data_gene_name[,cell_first_sample],
@@ -938,7 +946,7 @@ plotSpatialScatterpie(
 
 No, let's look at the correlation matrices to see which cell type are most often occurring rather than mutually exclusive within our data set.
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=3, fig.height=3}
 
 plotCorrelationMatrix(res$mat)
 ```
@@ -947,21 +955,32 @@ plotCorrelationMatrix(res$mat)
 
 
 
-:::: note
+::: note
 **Exercise 1.3**
 
 Rather than looking at the correlation matrix, overall, let's observe whether the correlation structure amongst cell types is consistent across samples. Do you think it's consistent or noticeably different?
-::::
+:::
 
 
-:::: note
+```{r}
+
+lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+```
+
+::: note
 **Exercise 1.4**
 
 Now let's observe whether the correlation structure is consistent across spatial regions, irrespectively of the sample of origin. Do you think they are consistent or noticably different?
-::::
+:::
 
+```{r}
+res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$spatialLIBD ) 
 
-:::: note
+lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+
+```
+
+::: note
 **Exercise 1.5**
 
 Some of the most positive correlations involve the end of cells with Oligodendrocytes and Leptomeningeal cells.
@@ -971,7 +990,7 @@ Leptomeningeal cells refer to the cells that make up the leptomeninges, which co
 Oligodendrocytes are a type of glial cell in the central nervous system (CNS) of vertebrates, including humans and mouse. These cells are crucial for the formation and maintenance of the myelin sheath, a fatty layer that encases the axons of many neurons.
 
 Let's try to visualise the pixel where these cell types most occur.
-::::
+:::
 
 
 **Session Information**
