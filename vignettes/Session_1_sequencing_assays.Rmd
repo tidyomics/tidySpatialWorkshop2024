@@ -191,7 +191,8 @@ We will use `ggpavis` package to visualise the data.
 imgData(spatial_data)
 
 # Simple visualization of spatial data
-ggspavis::plotSpots(spatial_data)
+ggspavis::plotSpots(spatial_data) + 
+  facet_wrap(~sample_id)
 
 ```
 
@@ -205,7 +206,8 @@ Layers = L1-6, white matter = WM
 ggspavis::plotSpots(
   spatial_data, 
   annotate = "spatialLIBD"
-)
+) + 
+  facet_wrap(~sample_id)
 ```
 
 Explore additional visualisation features offered by the Visium platform.
@@ -280,10 +282,10 @@ After applying the QC metrics, it’s crucial to visually assess their impact. T
 colData(spatial_data)$qc_mitochondrial_transcription <- qc_mitochondrial_transcription
 
 ## Check for putative spatial pattern of removed spots
-plotQC(
+plotSpotQC(
   spatial_data, 
-  type = "spots",  
-  discard = "qc_mitochondrial_transcription", 
+  plot_type = "spot",  
+  annotate = "qc_mitochondrial_transcription", 
 ) + 
   facet_wrap(~sample_id)
 
@@ -323,10 +325,10 @@ Incorporating Library Size Threshold in Dataset: This step involves adding the l
 colData(spatial_data)$qc_total_counts <- qc_total_counts
 
 ## Check for putative spatial pattern of removed spots
-plotQC(
+plotSpotQC(
   spatial_data, 
-  type = "spots",  
-  discard = "qc_total_counts", 
+  plot_type = "spot",  
+  annotate = "qc_total_counts", 
 ) + 
   facet_wrap(~sample_id)
 
@@ -365,10 +367,10 @@ Incorporating Gene Expression Threshold in Dataset: After setting the gene expre
 colData(spatial_data)$qc_detected_genes <- qc_detected_genes
 
 ## Check for putative spatial pattern of removed spots
-plotQC(
+plotSpotQC(
   spatial_data, 
-  type = "spots",  
-  discard = "qc_detected_genes", 
+  plot_type = "spot",  
+  annotate = "qc_detected_genes", 
 ) + 
   facet_wrap(~sample_id)
 
@@ -398,10 +400,10 @@ After applying all QC filters, this block combines them and stores the results i
 colData(spatial_data)$discard <- qc_total_counts | qc_detected_genes | qc_mitochondrial_transcription
 
 ## Check the spatial pattern of combined set of discarded spots
-plotQC(
+plotSpotQC(
   spatial_data, 
-  type = "spots",  
-  discard = "discard", 
+  plot_type = "spot",  
+  annotate = "discard", 
 ) + 
   facet_wrap(~sample_id)
 
@@ -532,7 +534,8 @@ As for comparison, we show the manually annotated regions. We can see that while
 ```{r, fig.width=7, fig.height=8}
 ## Plot ground truth in tissue map
 ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
-  scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
+  facet_wrap(~sample_id) +
+  scale_color_manual(values = gsub("ayer", "", libd_layer_colors)) 
 
 ```
 
@@ -700,7 +703,8 @@ plot_bank_smooth <- lapply(spatial_data_list, function(x) {
 plot_grid(plotlist = plot_bank_smooth, ncol = 3, byrow = TRUE)
 
 ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
-    scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
+  facet_wrap(~sample_id) +
+  scale_color_manual(values = gsub("ayer", "", libd_layer_colors)) +
   theme(legend.position = "none") +
   labs(title = "spatialLIBD regions")
 ```
@@ -712,7 +716,7 @@ We have applied cluster smoothing using `smoothLabels`. How much do you think th
 
 -   Plot the non smoothed cluster
 -   identify the pixel that have been smoothed, and
--   visualise them using `plotQC` that we have used above.
+-   visualise them using `plotSpotQC` that we have used above.
 :::
 
 ```{r, fig.width=7, fig.height=8}
@@ -720,7 +724,8 @@ We have applied cluster smoothing using `smoothLabels`. How much do you think th
 spe_joint <- do.call(cbind, spatial_data_list)
 
 
- ggspavis::plotSpots(spe_joint, annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), size = 0.8, pal = pal) +
+ ggspavis::plotSpots(spe_joint, annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), pal = pal) +
+    facet_wrap(~sample_id) +
     theme(legend.position = "none") +
     labs(title = "BANKSY clusters")
 
@@ -730,15 +735,12 @@ spe_joint <- do.call(cbind, spatial_data_list)
 
 spe_joint$has_changed =  !spe_joint$clust_M0_lam0.2_k50_res0.7 == spe_joint$clust_M0_lam0.2_k50_res0.7_smooth
 
-
-
-plotQC(
+plotSpotQC(
   spe_joint, 
-  type = "spots",  
-  discard = "has_changed"
-) +
+  plot_type = "spot",  
+  annotate = "has_changed", 
+) + 
   facet_wrap(~sample_id)
-
 ```
 
 ### 8. Deconvolution of pixel-based spatial data
@@ -777,7 +779,7 @@ brain_reference =
   dplyr::filter(tissue_harmonised=="brain", disease == "normal", organism == "Mus musculus") |> 
   
   # Collect pseudobulk as SummarizedExperiment
-  get_pseudobulk(cache_directory = "/vast/projects/cellxgene_curated") |> 
+  get_pseudobulk() |> 
   
   # Normalise for Spotlight
   scuttle::logNormCounts() |> 

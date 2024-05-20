@@ -54,7 +54,8 @@ Imports:
     tidySummarizedExperiment (>= 1.15.0),
     tidyverse,
     SPOTlight,
-    Seurat
+    Seurat,
+    ggcorrplot
 Suggests:
     knitr,
     markdown,
