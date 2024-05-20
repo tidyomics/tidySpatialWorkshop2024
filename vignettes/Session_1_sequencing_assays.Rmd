@@ -71,6 +71,9 @@ This emerging field combines traditional omics data (like genomics and transcrip
 
 -   **Visualisation Capabilities:** With its advanced graphical functionalities, Bioconductor aids in creating insightful visual representations of spatial omics data, which is crucial for understanding spatial patterns in gene expression.
 
+Slack channel: #community-bioc
+Support forum: https://support.bioconductor.org/
+
 In the following sections of this workshop, we will explore practical examples and dive deeper into how Bioconductor is used in spatial omics analyses, including hands-on coding examples. Stay tuned for an engaging journey through spatial omics with Bioconductor!
 
 ### 2. Getting Started with SpatialExperiment
@@ -138,6 +141,8 @@ library(ExperimentHub)
 spatial_data <- 
   ExperimentHub::ExperimentHub() |> 
   spatialLIBD::fetch_data( eh = _, type = "spe")
+
+names(libd_layer_colors) = gsub("ayer", "", names(libd_layer_colors))
 
 # Clear the reductions
 reducedDims(spatial_data) = NULL 
@@ -210,7 +215,7 @@ ggspavis::plotSpots(
   facet_wrap(~sample_id)
 ```
 
-Explore additional visualisation features offered by the Visium platform.
+Explore additional visualisation features offered by the Visium platform, exposing the H&E (hematoxylin and eosin) image.
 
 ```{r, fig.width=7, fig.height=8}
 ggspavis::plotVisium(spatial_data)
@@ -223,13 +228,14 @@ ggspavis::plotVisium(
   spatial_data, 
   annotate = "spatialLIBD", 
   highlight = "in_tissue"
-) 
+) + 
+  facet_wrap(~sample_id)
 
 ```
 
 ### 5. Quality control and filtering
 
-We will use the `scater` package [McWe'lly et al. 2017](https://academic.oup.com/bioinformatics/article/33/8/1179/2907823?login=true) to compute the three primary QC metrics we discussed earlWe'llUsing the scater Package for QC Metrics: We'll apply the `scater` package to compute three primary quality control metrics. We'll also use `ggspavis` for visualisation along with some custom plotting techniques.
+We will use the `scater` package [McCarthy et al. 2017](https://academic.oup.com/bioinformatics/article/33/8/1179/2907823?login=true) to compute the three primary QC metrics we discussed earlWe'llUsing the scater Package for QC Metrics: We'll apply the `scater` package to compute three primary quality control metrics. We'll also use `ggspavis` for visualisation along with some custom plotting techniques.
 
 Previously, we visualised both on- and off-tissue spots. Moving forward, we focus on on-tissue spots for more relevant analyses. This block shows how to filter out off-tissue spots to refine the dataset.
 
@@ -291,6 +297,8 @@ plotSpotQC(
 
 ```
 
+#### Library size
+
 This analysis focuses on examining the distribution of library sizes across different spots. It uses a histogram and density plot to visualise the range and commonality of library sizes in the dataset.
 
 ```{r, fig.width=7, fig.height=8}
@@ -304,8 +312,6 @@ data.frame(colData(spatial_data)) |>
   ylab("Density") + 
   theme_classic()
 ```
-
-#### Library size
 
 Setting Library Size Threshold: After examining the library sizes, a threshold is applied to identify spots with library sizes below 700, which are considered for potential exclusion from further analysis.
 
@@ -335,7 +341,9 @@ plotSpotQC(
 
 ```
 
-Analysing Gene Expression Per Spot: This analysis examines how many genes are expressed per spot, using a histogram and density plot to visualise the distribution of gene counts across the dataset.
+#### Detected genes
+
+This analysis examines how many genes are expressed per spot, using a histogram and density plot to visualise the distribution of gene counts across the dataset.
 
 ```{r, fig.width=7, fig.height=8}
 ## Density and histogram of library sizes
@@ -349,7 +357,6 @@ data.frame(colData(spatial_data) ) |>
   theme_classic()
 ```
 
-#### Detected genes
 
 Setting Gene Expression Threshold: This block applies a threshold to identify spots with fewer than 500 detected genes, considering these for exclusion to ensure data quality.
 
@@ -435,6 +442,7 @@ curve(metadata(dec)$trend(x), col = "blue", add = TRUE)
 dec = scran::modelGeneVar(spatial_data, subset.row = genes, block = spatial_data$sample_id) 
 hvg = scran::getTopHVGs(dec, n = 1000)
 
+rowData(spatial_data[head(hvg),])[,c("gene_id", "gene_name")]
 ```
 
 #### PCA
@@ -453,9 +461,16 @@ reducedDimNames(spatial_data)
 reducedDim(spatial_data, "PCA")[1:5, 1:5]
 ```
 
+::: note
+As for single-cell data, we need to verify that there is not significant batch effect. If so we need to adjust for it (a.k.a. integration) before calculating principal component. Many adjustment methods to output adjusted principal components directly. 
+:::
+
+
 #### UMAP
 
 You can appreciate that, in this case, selecting within-sample variable genes, we do not see major batch effects across samples. We see two major pixel clusters.
+
+We can appreciate that there are no major batch effects across samples, and we don't see grouping driven by sample_id.
 
 ```{r, fig.width=7, fig.height=8}
 set.seed(42)
@@ -465,24 +480,14 @@ scater::plotUMAP(spatial_data, colour_by = "sample_id", point_size = 0.2)
 ```
 
 ::: note
-**Exercise**
+**Exercise 1.1**
 
 Visualise where the two macro clusters are located spatially. We will take a very pragmatic approach and get cluster label from splitting the UMAP coordinated in two (`colData()` and `reducedDim()` will help us, see above), and then visualise it with `ggspavis`.
+
+- Modify the `SpatialExperiment` object based on the UMAP1 dimension so to divide those 2 cluster
+- Visualise the UMAP colouring by the new labelling
+- Visualise the Visium slide colouring by the new labelling
 :::
-
-```{r, fig.width=7, fig.height=8}
-# Label
-colData(spatial_data)$macro_cluster = reducedDim(spatial_data, "UMAP")[,"UMAP1"] > 2.5
-
-# Verify
-scater::plotUMAP(spatial_data, colour_by = "macro_cluster", point_size = 0.2) 
-
-ggspavis::plotVisium(
-  spatial_data, 
-  annotate = "macro_cluster", 
-  highlight = "in_tissue"
-)
-```
 
 ### 7. Clustering
 
@@ -526,6 +531,7 @@ Those two clusters group the white matter from the rest of the layers.
 ```{r, fig.width=7, fig.height=8}
 ## Plot in tissue map
 ggspavis::plotSpots(spatial_data, annotate = "label") + 
+  facet_wrap(~sample_id) +
   scale_color_brewer(palette = "Paired")
 ```
 
@@ -535,7 +541,7 @@ As for comparison, we show the manually annotated regions. We can see that while
 ## Plot ground truth in tissue map
 ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
   facet_wrap(~sample_id) +
-  scale_color_manual(values = gsub("ayer", "", libd_layer_colors)) 
+  scale_color_manual(values = libd_layer_colors)
 
 ```
 
@@ -545,7 +551,21 @@ To cluster spatial regions (i.e. tissue domain) rather than single-cell types, t
 
 BANKSY combines molecular and spatial information. BANKSY leverages the fact that a cell’s state can be more fully represented by considering both its own transcriptome "nd that of its local m"croenvironment.This algorithm embeds cells within a combined space that incorporates their own transcriptome and that of their locell'svironment, representing both the cell state and the surrounding microenvironment.
 
-Overview of the algorithm - \* Construct a neighborhood graph between cells in physical space (k-nearest neighbors or radius nearest neighbors). - \* We use neighborhood graph to compute two matrices: -- \*\* Average neighborhood expression matrix -- \*\* "Azimuthal Gabor filter" matrix. It represents the transcriptomic microenvironment around each cell. It measures the gradient of gene expression in each cell’s neighborhood. - \* These matrices are then scaled on the basis of a mixing parameter λ, which controls their relative weighting - \* Concatenate these two matrices with the original gene–cell expression matrix - \* Combine these three matrices by direct product
+Overview of the algorithm 
+
+- \* Construct a neighborhood graph between cells in physical space (k-nearest neighbors or radius nearest neighbors). 
+
+- \* We use neighborhood graph to compute two matrices: 
+
+-- \*\* Average neighborhood expression matrix 
+
+-- \*\* "Azimuthal Gabor filter" matrix. It represents the transcriptomic microenvironment around each cell. It measures the gradient of gene expression in each cell’s neighborhood. 
+
+- \* These matrices are then scaled on the basis of a mixing parameter λ, which controls their relative weighting 
+
+- \* Concatenate these two matrices with the original gene–cell expression matrix 
+
+- \* Combine these three matrices by direct product
 
 [Singhal et al., 2024](https://www.nature.com/articles/s41588-024-01664-3)
 
@@ -581,6 +601,9 @@ hvgs <- lapply(seu_list, function(x) {
 })
 hvgs <- Reduce(union, hvgs)
 rm(seu_list, spatial_data_list_for_seurat)
+
+rowData(spatial_data[head(hvgs),])[,c("gene_id", "gene_name")]
+
 ```
 
 We now split the data by sample, to compute the neighbourhood matrices.
@@ -693,24 +716,25 @@ pal <- c(
   "#f39c12", "#d35400", "#7f8c8d", "#2ecc71", "#e67e22"
 )
 
-plot_bank_smooth <- lapply(spatial_data_list, function(x) {
-  ggspavis::plotSpots(x, annotate = sprintf("%s_smooth", "clust_M0_lam0.2_k50_res0.7"), pal = pal) +
+ ggspavis::plotSpots(
+   do.call(cbind, spatial_data_list), 
+   annotate = sprintf("%s_smooth", "clust_M0_lam0.2_k50_res0.7"), 
+   pal = pal
+  ) +
+    facet_wrap(~sample_id) +
     theme(legend.position = "none") +
     labs(title = "BANKSY clusters")
-})
-
-
-plot_grid(plotlist = plot_bank_smooth, ncol = 3, byrow = TRUE)
+ 
 
 ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
   facet_wrap(~sample_id) +
-  scale_color_manual(values = gsub("ayer", "", libd_layer_colors)) +
+  scale_color_manual(values = libd_layer_colors) +
   theme(legend.position = "none") +
   labs(title = "spatialLIBD regions")
 ```
 
 ::: note
-**Exercise**
+**Exercise 1.2**
 
 We have applied cluster smoothing using `smoothLabels`. How much do you think this operation has affected the cluster labels. To find out,
 
@@ -718,30 +742,6 @@ We have applied cluster smoothing using `smoothLabels`. How much do you think th
 -   identify the pixel that have been smoothed, and
 -   visualise them using `plotSpotQC` that we have used above.
 :::
-
-```{r, fig.width=7, fig.height=8}
-
-spe_joint <- do.call(cbind, spatial_data_list)
-
-
- ggspavis::plotSpots(spe_joint, annotate = sprintf("%s", "clust_M0_lam0.2_k50_res0.7"), pal = pal) +
-    facet_wrap(~sample_id) +
-    theme(legend.position = "none") +
-    labs(title = "BANKSY clusters")
-
-```
-
-```{r, fig.width=7, fig.height=8}
-
-spe_joint$has_changed =  !spe_joint$clust_M0_lam0.2_k50_res0.7 == spe_joint$clust_M0_lam0.2_k50_res0.7_smooth
-
-plotSpotQC(
-  spe_joint, 
-  plot_type = "spot",  
-  annotate = "has_changed", 
-) + 
-  facet_wrap(~sample_id)
-```
 
 ### 8. Deconvolution of pixel-based spatial data
 
@@ -984,11 +984,13 @@ spatial_data$is_endothelial_leptomeningeal = is_endothelial_leptomeningeal
 spatial_data$is_endothelial_oligodendrocyte = is_endothelial_oligodendrocytes
 
 ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_leptomeningeal") +
+    facet_wrap(~sample_id) +
   scale_color_manual(values = c("TRUE"= "red", "FALSE" = "grey"))
 theme(legend.position = "none") +
   labs(title = "endothelial + leptomeningeal")
 
 ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_oligodendrocyte") +
+    facet_wrap(~sample_id) +
   scale_color_manual(values = c("TRUE"= "blue", "FALSE" = "grey"))
 theme(legend.position = "none") +
   labs(title = "endothelial + oligodendrocyte")
