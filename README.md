@@ -1,4 +1,4 @@
-# spatialOmicsWorkshop2024
+# tidySpatialWorkshop2024
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
