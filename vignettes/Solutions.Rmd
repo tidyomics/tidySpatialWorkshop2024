@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 
 ```{r, fig.width=7, fig.height=8, eval=FALSE}
 # Label
-colData(spatial_data)$macro_cluster = reducedDim(spatial_data, "UMAP")[,"UMAP1"] > 2.5
+colData(spatial_data)$macro_cluster = reducedDim(spatial_data, "UMAP")[,"UMAP1"] > -2.5
 
 # Verify
 scater::plotUMAP(spatial_data, colour_by = "macro_cluster", point_size = 0.2) 
@@ -101,4 +101,48 @@ differential_analysis |>
   filter(FDR<0.05) 
 
 #  tidybulk::test_differential_abundance(~ dead + sample_id + (1 | spatialLIBD), method = "glmmseq_lme4")
+```
+
+
+
+
+```{r, fig.width=7, fig.height=8}
+
+res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$sample_id ) 
+
+lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+
+```
+
+
+```{r, fig.width=7, fig.height=8}
+
+res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$spatialLIBD ) 
+
+lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+```
+
+
+```{r, fig.width=7, fig.height=8}
+
+mat_df = as.data.frame(res$mat)
+
+is_endothelial_leptomeningeal = mat_df$endothelial_cell >0.1 & mat_df$leptomeningeal_cell>0.1 & mat_df$endothelial_cell  + mat_df$leptomeningeal_cell > 0.4 
+is_endothelial_oligodendrocytes = mat_df$endothelial_cell >0.1 & mat_df$oligodendrocyte>0.05 & mat_df$endothelial_cell  + mat_df$oligodendrocyte > 0.4 
+
+spatial_data$is_endothelial_leptomeningeal = is_endothelial_leptomeningeal
+spatial_data$is_endothelial_oligodendrocyte = is_endothelial_oligodendrocytes
+
+ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_leptomeningeal") +
+    facet_wrap(~sample_id) +
+  scale_color_manual(values = c("TRUE"= "red", "FALSE" = "grey"))
+theme(legend.position = "none") +
+  labs(title = "endothelial + leptomeningeal")
+
+ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_oligodendrocyte") +
+    facet_wrap(~sample_id) +
+  scale_color_manual(values = c("TRUE"= "blue", "FALSE" = "grey"))
+theme(legend.position = "none") +
+  labs(title = "endothelial + oligodendrocyte")
+
 ```
