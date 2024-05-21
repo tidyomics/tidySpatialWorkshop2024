@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 ```
 
 
-::: note
+::: {.note}
 **Exercise 1.1**
 :::
 
@@ -35,7 +35,7 @@ ggspavis::plotVisium(
 ```
 
 
-::: note
+::: {.note}
 **Exercise 1.2**
 :::
 
@@ -63,9 +63,123 @@ plotSpotQC(
   facet_wrap(~sample_id)
 ```
 
-:::: {.note}
-**Excercise 2.1**
-::::
+
+::: {.note}
+**Excercise 1.3**
+:::
+
+
+```{r, fig.width=7, fig.height=8}
+
+res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$sample_id ) 
+
+lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+
+```
+
+::: {.note}
+**Excercise 1.4**
+:::
+
+
+```{r, fig.width=7, fig.height=8}
+
+res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$spatialLIBD ) 
+
+lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+```
+
+::: {.note}
+**Excercise 1.5**
+:::
+
+
+```{r, fig.width=7, fig.height=8}
+
+
+
+is_endothelial_leptomeningeal = mat_df$endothelial_cell >0.1 & mat_df$leptomeningeal_cell>0.1 & mat_df$endothelial_cell + mat_df$leptomeningeal_cell > 0.4 
+
+spatial_data$is_endothelial_leptomeningeal = is_endothelial_leptomeningeal
+
+ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_leptomeningeal") +
+    facet_wrap(~sample_id) +
+  scale_color_manual(values = c("TRUE"= "red", "FALSE" = "grey"))
+theme(legend.position = "none") +
+  labs(title = "endothelial + leptomeningeal")
+
+
+
+
+is_endothelial_oligodendrocytes = mat_df$endothelial_cell >0.1 & mat_df$oligodendrocyte>0.05 & mat_df$endothelial_cell  + mat_df$oligodendrocyte > 0.4 
+
+spatial_data$is_endothelial_oligodendrocyte = is_endothelial_oligodendrocytes
+
+ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_oligodendrocyte") +
+    facet_wrap(~sample_id) +
+  scale_color_manual(values = c("TRUE"= "blue", "FALSE" = "grey"))
+theme(legend.position = "none") +
+  labs(title = "endothelial + oligodendrocyte")
+
+```
+
+
+
+::: {.note}
+**Exercise 2.1**
+:::
+
+```{r}
+# Get top variable genes 
+genes <- !grepl(pattern = "^Rp[l|s]|Mt", x = rownames(spatial_data))
+hvg = scran::modelGeneVar(spatial_data, subset.row = genes, block = spatial_data$sample_id) 
+hvg = scran::getTopHVGs(dec, n = 1000)
+
+# Calculate PCA
+spatial_data <- 
+  spatial_data |> 
+  scuttle::logNormCounts() |> 
+  scater::runPCA(subset_row = hvg) |> 
+
+  # Calculate UMAP
+  scater::runUMAP(dimred = "PCA") |> 
+
+  # Plot
+  scater::plotUMAP(colour_by = ".gate")
+```
+
+
+::: {.note}
+**Exercise 2.2**
+:::
+
+
+```{r}
+rowData(spatial_data) |> 
+  as_tibble() |> 
+  filter( gene_name == "PECAM1")
+
+spatial_data |> 
+
+  # Join the feature
+  join_features("ENSG00000261371", shape="wide") |> 
+
+  # Calculate the quantile
+  mutate(my_quantile = quantile(ENSG00000261371, 0.75)) |> 
+
+  # Label the pixels
+  mutate(PECAM1_positive = ENSG00000261371 > my_quantile) |> 
+
+  # Plot
+  ggspavis::plotSpots(annotate = "PECAM1_positive") +
+  facet_wrap(~sample_id) 
+
+```
+
+
+::: {.note}
+**Excercise 2.3**
+:::
 
 ```{r}
 library(tidySummarizedExperiment)
@@ -102,45 +216,31 @@ differential_analysis |>
 ```
 
 
+::: {.note}
+**Excercise 2.4**
+:::
 
+```{r}
+rownames(spatial_data) = rowData(spatial_data)$gene_name
 
-```{r, fig.width=7, fig.height=8}
+marker_genes_of_amyloid_plaques = c("APP", "PSEN1", "PSEN2", "CLU", "APOE", "CD68", "ITGAM", "AIF1")
 
-res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$sample_id ) 
+spatial_data |> 
 
-lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
+# Join the features
+  join_features(marker_genes_of_amyloid_plaques, shape = "wide") |> 
 
-```
+  # Rescaling
+  mutate(across(any_of(marker_genes_of_amyloid_plaques), scales::rescale)) |> 
 
+# Summarising signature
+  mutate(amyloid_plaques_signature  = APP + PSEN1 + PSEN2 + CLU + APOE + CD68 + ITGAM + AIF1) |> 
 
-```{r, fig.width=7, fig.height=8}
+# Plotting
+  ggspavis::plotSpots(
+    annotate = "amyloid_plaques_signature"
+  ) + 
+  facet_wrap(~sample_id)
 
-res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$spatialLIBD ) 
-
-lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
-```
-
-
-```{r, fig.width=7, fig.height=8}
-
-mat_df = as.data.frame(res$mat)
-
-is_endothelial_leptomeningeal = mat_df$endothelial_cell >0.1 & mat_df$leptomeningeal_cell>0.1 & mat_df$endothelial_cell  + mat_df$leptomeningeal_cell > 0.4 
-is_endothelial_oligodendrocytes = mat_df$endothelial_cell >0.1 & mat_df$oligodendrocyte>0.05 & mat_df$endothelial_cell  + mat_df$oligodendrocyte > 0.4 
-
-spatial_data$is_endothelial_leptomeningeal = is_endothelial_leptomeningeal
-spatial_data$is_endothelial_oligodendrocyte = is_endothelial_oligodendrocytes
-
-ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_leptomeningeal") +
-    facet_wrap(~sample_id) +
-  scale_color_manual(values = c("TRUE"= "red", "FALSE" = "grey"))
-theme(legend.position = "none") +
-  labs(title = "endothelial + leptomeningeal")
-
-ggspavis::plotSpots(spatial_data, annotate = "is_endothelial_oligodendrocyte") +
-    facet_wrap(~sample_id) +
-  scale_color_manual(values = c("TRUE"= "blue", "FALSE" = "grey"))
-theme(legend.position = "none") +
-  labs(title = "endothelial + oligodendrocyte")
 
 ```

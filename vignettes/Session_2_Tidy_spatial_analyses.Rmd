@@ -44,6 +44,26 @@ style="width:100%; height:600px;"
 frameborder="0">
 </iframe>
 
+#### Installation
+
+let's make sure we get the latest packages available on github
+
+```{r, eval=FALSE}
+
+# In May 2024, the following packages should be installed from github repositories, to use the latest features. In case you have them pre installed, run the following command
+BiocManager::install(c("lmweber/ggspavis", 
+                       "stemangiola/tidySummarizedExperiment", 
+                        "stemangiola/tidySingleCellExperiment", 
+                       "william-hutchison/tidySpatialExperiment", 
+                       "stemangiola/tidybulk", 
+                       "stemangiola/tidygate", 
+                       "stemangiola/CuratedAtlasQueryR"), 
+                     update = FALSE)
+
+```
+
+**Then please restart your R session** to make sure the packages we will load will be the ones we intalled mode recently. 
+
 Let's load the libraries needed for this session
 
 ```{r, message = FALSE}
@@ -87,6 +107,9 @@ spatial_data <-
 # Clear the reductions
 reducedDims(spatial_data) = NULL 
 
+# Make cell ID unique
+colnames(spatial_data)  = paste0(colnames(spatial_data), colData(spatial_data)$sample_id)
+
 # Display the object
 spatial_data
 ```
@@ -120,6 +143,10 @@ options("restore_SpatialExperiment_show" = FALSE)
 spatial_data
 ```
 
+::: {.note}
+Note that **rows** in this context refers to rows of the abstraction, not **rows** of the SpatialExperiment which correspond to genes **tidySpatialExperiment** prioritizes cells as the units of observation in the abstraction, while the full dataset, including measurements of expression of all genes, is still available "in the background".
+:::
+
 #### Original behaviour is preserved
 
 The tidy representation behaves exactly as a native `SpatialExperiment`. It can be interacted with using [SpatialExperiment commands](https://www.bioconductor.org/packages/release/bioc/vignettes/SpatialExperiment/inst/doc/SpatialExperiment.html) 
@@ -133,10 +160,46 @@ assays(spatial_data)
 
 We can also interact with our object as we do with any tidyverse tibble. We can use `tidyverse` commands, such as `filter`, `select` and `mutate` to explore the `tidySpatialExperiment` object. Some examples are shown below and more can be seen at the `tidySpatialExperiment` [website](https://stemangiola.github.io/tidySpatialExperiment/articles/introduction.html#tidyverse-commands-1).
 
+#### Select
+
+We can use `select` to view columns, for example, to see the filename, total cellular RNA abundance and cell phase. 
+
+If we use `select` we will also get any view-only columns returned, such as the UMAP columns generated during the preprocessing.
+
+```{r}
+spatial_data |> select(.cell, sample_id, in_tissue, spatialLIBD)
+```
+
+::: {.note}
+Note that some columns are always displayed no matter whet. These column include special slots in the objects such as reduced dimensions, spatial coordinates (mandatory for `SpatialExperiment`), and sample identifier (mandatory for `SpatialExperiment`). 
+:::
+
+Although the select operation can be used as a display tool, to explore our object, it updates the `SpatialExperiment` metadata, subsetting the desired columns.
+
+```{r}
+spatial_data |> 
+  select(.cell, sample_id, in_tissue, spatialLIBD) |> 
+  colData()
+```
+
+To select columns of interest, we can use `tidyverse` powerful pattern-matching tools. For example, using the method `contains` to select 
+
+```{r}
+
+spatial_data |> 
+  select(.cell, contains("sum")) 
+```
+
+
 #### Filter
 
-We can use `filter` to choose rows, for example, to select our three samples we are going to work with.
+We can use `filter` to subset rows, for example, to keep our three samples we are going to work with.
 
+We just display the dimensions of the dataset before filtering
+
+```{r}
+nrow(spatial_data)
+```
 
 ```{r}
 spatial_data = 
@@ -144,6 +207,12 @@ spatial_data =
   filter(sample_id %in% c("151673", "151675", "151676"))
 
 spatial_data
+```
+
+Here we confirm that the tidy R manipulation has changed the underlining object.
+
+```{r}
+nrow(spatial_data)
 ```
 
 In comparison the base-R method recalls the variable multiple times
@@ -155,34 +224,68 @@ spatial_data = spatial_data[,spatial_data$sample_id %in% c("151673", "151675", "
 Or for example, to see just the rows for the cells in G1 cell-cycle stage.
 
 ```{r}
-spatial_data |> dplyr::filter(spatialLIBD == "L1")
+spatial_data |> dplyr::filter(sample_id == "151673", spatialLIBD == "L1")
 ```
 
-:::: {.note}
-Note that **rows** in this context refers to rows of the abstraction, not **rows** of the SpatialExperiment which correspond to genes **tidySpatialExperiment** prioritizes cells as the units of observation in the abstraction, while the full dataset, including measurements of expression of all genes, is still available "in the background".
-::::
-
-#### Select
-
-We can use `select` to view columns, for example, to see the filename, total cellular RNA abundance and cell phase. 
-
-If we use `select` we will also get any view-only columns returned, such as the UMAP columns generated during the preprocessing.
+Flexible, more powerful filters with `stringr`
 
 ```{r}
-spatial_data |> select(.cell, sample_id, in_tissue, spatialLIBD)
+
+spatial_data |> 
+  dplyr::filter(
+    subject |> str_detect("Br[0-9]1"), 
+    spatialLIBD == "L1"
+  )
+
+```
+
+#### Summarise
+
+The integration of all spot/pixel/cell-related information in one table abstraction is very powerful to speed-up data exploration ana analysis.
+
+```{r}
+
+spatial_data |> 
+  filter(sum_umi < 1000) |> 
+  count(sample_id)
+
 ```
 
 #### Mutate
 
 We can use `mutate` to create a column. For example, we could create a new `Phase_l` column that contains a lower-case version of `Phase`. 
 
-In this case, three columns that are view only (`sample_id`, `pxl_col_in_fullres`, `pxl_row_in_fullres`, `PC*`) will be always included in the tidy representation because they cannot be omitted from the data container (is opposed to metadata)
+::: {.note}
+Note that the special columns `sample_id`, `pxl_col_in_fullres`, `pxl_row_in_fullres`, `PC*` are view only and cannot be mutated.
+:::
 
 ```{r message=FALSE}
 spatial_data |>
   mutate(spatialLIBD_lower = tolower(spatialLIBD)) |>
   select(.cell, spatialLIBD, spatialLIBD_lower)
 ```
+
+We can update the underlying `SpatialExperiment` object, for future analyses. And confirm that the `SpatialExperiment` metadata has been mutated.
+
+```{r message=FALSE}
+spatial_data = 
+  spatial_data |>
+  mutate(spatialLIBD_lower = tolower(spatialLIBD))
+
+spatial_data |> 
+  colData() |>
+  _[,c("spatialLIBD", "spatialLIBD_lower")]
+```
+
+We can mutate columns for on-the-fly analyses and exploration. Let's suppose one column has capitalisation inconsistencies, and we want to apply a unique filter.
+
+```{r message=FALSE}
+spatial_data |>
+  mutate(spatialLIBD = tolower(spatialLIBD)) |>
+  filter(spatialLIBD == "wm")
+```
+
+#### Extract
 
 We can use tidyverse commands to polish an annotation column. We will extract the sample, and group information from the file name column into separate columns. 
 
@@ -195,8 +298,6 @@ spatial_data = spatial_data  |> mutate(file_path = glue("../data/single_cell/{sa
 # First take a look at the file column
 spatial_data |> select(.cell, file_path)
 ```
-
-#### Extract
 
 Extract specific identifiers from complex data paths, simplifying the dataset by isolating crucial metadata. This process allows for clearer identification of samples based on their file paths, improving data organization.
 
@@ -222,7 +323,6 @@ spatial_data <- spatial_data |> unite("sample_subject", sample_id, subject, remo
 spatial_data |> select(.cell, sample_id, sample_subject, subject)
 ```
 
-
 ### 3. Advanced filtering/gating and pseudobulk
 
 `tidySpatialExperiment` provide a interactive advanced tool for gating region of interest for streamlined exploratory analyses.
@@ -233,67 +333,172 @@ Let's draw an arbitrary gate interactively
 
 ```{r, eval=FALSE}
 
-spatial_data = 
+spatial_data_gated = 
   spatial_data |> 
   
   # Filter one sample
   filter(in_tissue, sample_id=="151673") |> 
   
   # Gate based on tissue morphology
-  tidySpatialExperiment::gate_spatial(opacity = 0.2, image_index = 1) 
+  tidySpatialExperiment::gate_spatial(alpha = 0.1) 
+```
+
+
+`tidySpatialExperiment` added a `.gate` column to the `SpatialExperiment` object. We can see this column in its tibble abstraction.
+
+```{r, eval=FALSE}
+spatial_data_gated |> select(.cell, .gate)
 ```
 
 This is recorded in the `.gate` column
 
 ```{r, eval=FALSE}
 
-spatial_data |>  select(.cell, .gate)
+spatial_data_gated |>  select(.cell, .gate)
 ```
 
 We can count how many pixels we selected with simple `tidyverse` grammar
 
 ```{r, eval=FALSE}
-spatial_data |> count(.gate)
+spatial_data_gated |> count(.gate)
 ```
 
-We can visualise the gating 
-
+To have a visual feedback of our selection we can plot the slide annotating by our newly created column.
 
 ```{r, eval=FALSE, fig.width=7, fig.height=8}
-spatial_data |> 
-  
-  # Plot our gate
-  ggspavis::plotSpots(annotate = ".gate") +
-    scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
-  labs(title = ".gate regions")
-  
+spatial_data_gated |> 
+  ggspavis::plotVisium(annotate = ".gate")
 ```
+
 
 ```{r, echo=FALSE, out.width="300px"}
 knitr::include_graphics(here("inst/images/tidySPE_gate.png"))
 ```
 
-And filter, for further analyses
+We can also filter, for further analyses
 
 ```{r, eval=FALSE}
-spatial_data |> 
+spatial_data_gated |> 
   filter(.gate)
 ```
 
-#### Summarisation/aggregation
+::: {.note}
+**Exercise 2.1**
+Gate roughly the white matter layer of the tissue (bottom-left) and visualise in UMAP reduced dimensions where this manual gate is distributed.
 
-The gated cells can then be divided into pseudobulks within a SummarizedExperiment object using tidySpatialExperiment’s aggregate_cells utility function.
+- Calculate UMAPs as we did for Sesison 1
+- Plot UMAP dimensions according to the gating
+:::
 
-```{r , eval=FALSE}
+### 4. Work with features
+
+By default `tidySpatialExperiment` (as well as `tidySingleCellExperiment`) focus their tidy abstraction on pixels and cells, as this is the key analysis and visualisation unit in sopatial and single-cell data. This has proven to be a practican solution to achieve elegant `tidy` analyses and visualisation.
+
+In contrast, bulk data focuses to features/genes for analysis. In this case its tidy representation with `tidySummarizedExperiment` prioritise features, exposing them to the user.
+
+If you want to interact with features, the method `join_features` will be helpful. For example, we can add one or more features of interest to our abstraction.
+
+Let's add the astrocyte marker GFAP 
+
+Find out ENSEMBL ID
+
+```{r}
+rowData(spatial_data) |> 
+  as_tibble() |> 
+  filter( gene_name == "GFAP")
+```
+
+Join the feature to the metadata
+
+```{r}
+spatial_data = 
+  spatial_data |> 
+  join_features("ENSG00000131095", shape="wide")
+
+spatial_data |> 
+  select(.cell, ENSG00000131095)
+
+```
+
+
+::: {.note}
+**Exercise 2.2**
+Join the endothelial marker PECAM1 (CD31, look for ENSEMBL ID), and plot in space the pixel that are in the 0.75 percentile of EPCAM1 expression. Are the PECAM1-positive pixels (endothelial?) spatially clustered?
+
+- Get the ENSEMBL ID
+- Join the feature to the tidy data abstraction
+- Calculate the 0.75 quantile across all pixels
+- Label the cells with high PECAM1
+- Plot the slide colouring for the new label 
+:::
+
+
+### 5. Summarisation/aggregation
+
+#### Distinct
+
+We can quickly explore the elements of a variable with distinct
+
+```{r}
+spatial_data |> 
+  distinct(sample_id)
+```
+We can `distinct` across multiple variables
+
+```{r}
+spatial_data |> 
+  distinct(sample_id, Cluster)
+```
+
+#### Count
+
+We can gather more information counting the instances of a variable
+
+```{r}
+spatial_data |> 
+  count(Cluster) |> 
+  arrange(desc(n))
+```
+
+We calculate summary statistics of a subset of data
+
+```{r}
+spatial_data |> 
+filter(Cluster==1) |> 
+  count(sample_id) |> 
+  arrange(desc(n))
+
+```
+
+#### Aggregate
+
+For summarised analyses, we can aggregate pixels/cells as pseudobulk with the function `aggregate_cells`. This also works for `SingleCellExeriment`.We obtain a `SummarizedExperiment`. 
+
+```{r}
 spe_regions_aggregated <-
-  spe_regions |>
-  aggregate_cells(c(sample_id, region))
+  spatial_data |>
+  aggregate_cells(c(sample_id, spatialLIBD))
 
 spe_regions_aggregated
 ```
 
+`tidyomics` allows to cross spatial, single-cell (Bioconductor and seurat), and bulk keeping a consistent interface.
 
-### 4. tidyfying your workflow
+```{r}
+library(tidySummarizedExperiment)
+
+spe_regions_aggregated
+
+```
+
+You will be able to apply the familiar `tidyverse` operations
+
+```{r}
+spe_regions_aggregated |> 
+  filter(sample_id == "151673")
+```
+
+### 6. tidyfying your workflow
 
 We will take workflow used in **Session 2**, performed using mostly base R syntax and convert it to tidy R syntax. We will show you how the readability and modularity of your workflow will improve. 
 
@@ -321,11 +526,11 @@ The `tidyverse` approach inherently supports chaining further operations without
 
 #### Manipulating feature information
 
-:::: {.note}
+::: {.note}
 For `SingleCellExperiment` there is no tidy API for manipulating feature wise data yet, on the contrary for `SummarizedExperiment`, because gene-centric the abstraction  allow for direct gene information manipulation. Currently, `tidySingleCellExperiment` and `tidySpatialExperiment` do not prioritize the manipulation of features (genes). 
 
 While these functions can employ genes for cell manipulation and visualisation, as demonstrated in `join_features()`, they lack tools for altering feature-related information. Instead, their primary focus is on cell information, which serves as the main observational unit in single-cell data. This contrasts with bulk RNA sequencing data, where features are more central.
-::::
+:::
 
 The tidy API for `SingleCellExperiment` has feature-manipulation API among our plans. See [tidyomics challenges](https://github.com/orgs/tidyomics/projects/1)
 
@@ -495,7 +700,7 @@ spatial_data_filtered =
 **Maintainability:** Fewer and self-explanatory lines of code and no need for intermediate steps make the code easier to maintain and modify, especially when conditions change or additional filters are needed.
 
 
-### 5. Visualisation
+### 7. Visualisation
 
 Here, we will show how to use ad-hoc spatial visualisation, as well as `ggplot` to explore spatial data we will show how `tidySpatialExperiment` allowed to alternate between tidyverse visualisation, and any visualisation compatible with `SpatialExperiment`. 
 
@@ -506,14 +711,13 @@ Let’s visualise the regions that spatialLIBD labelled across three Visium 10X 
 ```{r, fig.width=7, fig.height=8}
 spatial_data_filtered |> 
   ggspavis::plotSpots(annotate = "spatialLIBD") +
+  facet_wrap(~sample_id) +
     scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
   theme(legend.position = "none") +
   labs(title = "spatialLIBD regions")
 ```
 
 #### Custom visualisation: Plotting the regions
-
-
 
 ```{r, fig.width=7, fig.height=8}
 spatial_data |> 
@@ -589,8 +793,8 @@ spatial_data_filtered |>
 
 As you can appreciate, the relationship between the number of genes, probed Purcell and their mitochondrial prescription abundance it's quite  consistent.
 
-:::: {.note}
-**Excercise 2.1**
+::: {.note}
+**Excercise 2.3**
 
 To to practice the use of `tidyomics` on spatial data, we propose a few exercises that connect manipulation, calculations and visualisation. These exercises are just meant to be simple use cases that exploit tidy R streamlined language.
 
@@ -598,7 +802,34 @@ To to practice the use of `tidyomics` on spatial data, we propose a few exercise
 We assume that the cells we filtered as non-alive or damaged, characterised by being reached uniquely for mitochondrial, genes, and genes, linked to up ptosis. it is good practice to check these assumption. This exercise aims to estimate what genes are differentially expressed between filtered and unfiltered cells. Then visualise the results
 
 Use `tidyomic`s/`tidyverse` tools to label dead cells and perform differential expression within each region. Some of the comments you can use are: `mutate`, `nest`, `aggregate_cells`.
-::::
+:::
+
+::: {.note}
+**Excercise 2.4**
+
+Inspired by our audience, let's try to use `tidyomics` to identify potential Amyloid Plaques.
+
+Amyloid plaques are extracellular deposits primarily composed of aggregated amyloid-beta (Aβ) peptides. They are a hallmark of Alzheimer's disease (AD) and are also found in certain other neurodegenerative conditions.
+
+Amyloid plaques can be found in the brains of mice, particularly in transgenic mouse models that are engineered to develop Alzheimer's disease-like pathology. 
+
+Although amyloid plaques themselves are extracellular, the presence and formation of these plaques are associated with specific gene expression changes in the surrounding and involved cells. These gene markers are indicative of the processes that contribute to amyloid plaque formation, as well as the cellular response to these plaques ([Ranman et al., 2021](https://molecularneurodegeneration.biomedcentral.com/articles/10.1186/s13024-021-00465-0).)
+
+```{r}
+marker_genes_of_amyloid_plaques = c("APP", "PSEN1", "PSEN2", "CLU", "APOE", "CD68", "ITGAM", "AIF1")
+
+rownames(spatial_data) = rowData(spatial_data)$gene_name
+
+```
+
+The excercise includes
+- Join the features
+- Rescaling
+- Summarising signature (sum), `mutate()`
+- Plotting colousing by the signature
+
+# Plotting 
+:::
 
 
 **Session Information**

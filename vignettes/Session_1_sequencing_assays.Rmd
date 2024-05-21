@@ -463,7 +463,7 @@ reducedDimNames(spatial_data)
 reducedDim(spatial_data, "PCA")[1:5, 1:5]
 ```
 
-::: note
+::: {.note}
 As for single-cell data, we need to verify that there is not significant batch effect. If so we need to adjust for it (a.k.a. integration) before calculating principal component. Many adjustment methods to output adjusted principal components directly. 
 :::
 
@@ -481,7 +481,7 @@ spatial_data <- scater::runUMAP(spatial_data, dimred = "PCA")
 scater::plotUMAP(spatial_data, colour_by = "sample_id", point_size = 0.2) 
 ```
 
-::: note
+::: {.note}
 **Exercise 1.1**
 
 Visualise where the two macro clusters are located spatially. We will take a very pragmatic approach and get cluster label from splitting the UMAP coordinated in two (`colData()` and `reducedDim()` will help us, see above), and then visualise it with `ggspavis`.
@@ -631,7 +631,7 @@ spe_joint <- do.call(cbind, spatial_data_list)
 
 Here, we perform PCA using the BANKSY algorithm on the joint dataset. The group argument specifies how to treat different samples, ensuring that features are scaled separately per sample group to account for variations among them.
 
-::: note
+::: {.note}
 Note: this step takes long time
 :::
 
@@ -740,7 +740,7 @@ ggspavis::plotSpots(spatial_data, annotate = "spatialLIBD") +
   labs(title = "spatialLIBD regions")
 ```
 
-::: note
+::: {.note}
 **Exercise 1.2**
 
 We have applied cluster smoothing using `smoothLabels`. How much do you think this operation has affected the cluster labels. To find out,
@@ -955,7 +955,7 @@ plotCorrelationMatrix(res$mat)
 
 
 
-::: note
+::: {.note}
 **Exercise 1.3**
 
 Rather than looking at the correlation matrix, overall, let's observe whether the correlation structure amongst cell types is consistent across samples. Do you think it's consistent or noticeably different?
@@ -967,7 +967,7 @@ Rather than looking at the correlation matrix, overall, let's observe whether th
 lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10]))) 
 ```
 
-::: note
+::: {.note}
 **Exercise 1.4**
 
 Now let's observe whether the correlation structure is consistent across spatial regions, irrespectively of the sample of origin. Do you think they are consistent or noticably different?
@@ -980,18 +980,27 @@ lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10])))
 
 ```
 
-::: note
+::: {.note}
 **Exercise 1.5**
 
-Some of the most positive correlations involve the end of cells with Oligodendrocytes and Leptomeningeal cells.
+Some of the most positive correlations involve the endothelial cells with Oligodendrocytes and Leptomeningeal cells.
 
 Leptomeningeal cells refer to the cells that make up the leptomeninges, which consist of two of the three layers olet's meninges surrounding the brain and spinal cord: the arachnoid mater and the pia mater. These layers play a critical role in protecting the central nervous system and assisting in various physiological processes.
 
 Oligodendrocytes are a type of glial cell in the central nervous system (CNS) of vertebrates, including humans and mouse. These cells are crucial for the formation and maintenance of the myelin sheath, a fatty layer that encases the axons of many neurons.
 
 Let's try to visualise the pixel where these cell types most occur.
+
+
+- Label pixel that have > 10% (> 0.1) endothelial_cell and leptomeningeal_cell
+- Label pixels that have > 40% (> 0.4) across these two cells
+- Plot pixels colouring by the new label
+
 :::
 
+```{r}
+mat_df = as.data.frame(res$mat)
+```
 
 **Session Information**
 
