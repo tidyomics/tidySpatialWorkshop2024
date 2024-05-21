@@ -198,7 +198,7 @@ We can use `filter` to subset rows, for example, to keep our three samples we ar
 We just display the dimensions of the dataset before filtering
 
 ```{r}
-nrow(spatial_data)
+ncol(spatial_data)
 ```
 
 ```{r}
@@ -212,7 +212,7 @@ spatial_data
 Here we confirm that the tidy R manipulation has changed the underlining object.
 
 ```{r}
-nrow(spatial_data)
+ncol(spatial_data)
 ```
 
 In comparison the base-R method recalls the variable multiple times
@@ -221,7 +221,7 @@ In comparison the base-R method recalls the variable multiple times
 spatial_data = spatial_data[,spatial_data$sample_id %in% c("151673", "151675", "151676")]
 ```
 
-Or for example, to see just the rows for the cells in G1 cell-cycle stage.
+Or for example, to see just the rows for the cells in spatialLIBD region L1.
 
 ```{r}
 spatial_data |> dplyr::filter(sample_id == "151673", spatialLIBD == "L1")
@@ -305,7 +305,7 @@ Extract specific identifiers from complex data paths, simplifying the dataset by
 # Create column for sample
 spatial_data <- spatial_data |>
   # Extract sample ID from file path and display the updated data
-  tidyr::extract(file_path, "sample_id_from_file_path", "data/spatial/([a-zA-Z0-9_-]+)/outs.+", remove = FALSE)
+  tidyr::extract(file_path, "sample_id_from_file_path", "\\.\\./data/single_cell/([0-9]+)/outs/raw_feature_bc_matrix/", remove = FALSE)
 
 # Take a look
 spatial_data |> select(.cell, sample_id_from_file_path, everything())
