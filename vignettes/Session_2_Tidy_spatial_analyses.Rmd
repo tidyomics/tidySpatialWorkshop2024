@@ -56,8 +56,7 @@ BiocManager::install(c("lmweber/ggspavis",
                         "stemangiola/tidySingleCellExperiment", 
                        "william-hutchison/tidySpatialExperiment", 
                        "stemangiola/tidybulk", 
-                       "stemangiola/tidygate", 
-                       "stemangiola/CuratedAtlasQueryR"), 
+                       "stemangiola/tidygate"), 
                      update = FALSE)
 
 ```
@@ -69,13 +68,13 @@ Let's load the libraries needed for this session
 ```{r, message = FALSE}
 library(SpatialExperiment)
 
-# Tidyverse
+# Tidyverse library(tidyverse)
 library(ggplot2)
 library(plotly)
 library(dplyr)
 library(tidyr)
 library(purrr)
-library(glue)
+library(glue) # sprintf
 library(stringr)
 
 # Plotting
@@ -109,6 +108,7 @@ reducedDims(spatial_data) = NULL
 
 # Make cell ID unique
 colnames(spatial_data)  = paste0(colnames(spatial_data), colData(spatial_data)$sample_id)
+rownames(spatialCoords(spatial_data)) = colnames(spatial_data) # Bug?
 
 # Display the object
 spatial_data
@@ -129,7 +129,7 @@ spatial_data
 
 #### Data interface, display
 
-If we want to revert to the standard SpatialExperiment view we can do that.
+If we want to revert to the standard `SpatialExperiment` view we can do that.
 
 ```{r}
 options("restore_SpatialExperiment_show" = TRUE)
