@@ -350,13 +350,6 @@ spatial_data_gated =
 spatial_data_gated |> select(.cell, .gate)
 ```
 
-This is recorded in the `.gate` column
-
-```{r, eval=FALSE}
-
-spatial_data_gated |>  select(.cell, .gate)
-```
-
 We can count how many pixels we selected with simple `tidyverse` grammar
 
 ```{r, eval=FALSE}
@@ -386,13 +379,14 @@ spatial_data_gated |>
 **Exercise 2.1**
 Gate roughly the white matter layer of the tissue (bottom-left) and visualise in UMAP reduced dimensions where this manual gate is distributed.
 
-- Calculate UMAPs as we did for Sesison 1
+- Calculate PCA, UMAPs as we did for Session 1
+- Gate the area of white matter
 - Plot UMAP dimensions according to the gating
 :::
 
 ### 4. Work with features
 
-By default `tidySpatialExperiment` (as well as `tidySingleCellExperiment`) focus their tidy abstraction on pixels and cells, as this is the key analysis and visualisation unit in sopatial and single-cell data. This has proven to be a practican solution to achieve elegant `tidy` analyses and visualisation.
+By default `tidySpatialExperiment` (as well as `tidySingleCellExperiment`) focus their tidy abstraction on pixels and cells, as this is the key analysis and visualisation unit in spatial and single-cell data. This has proven to be a practical solution to achieve elegant `tidy` analyses and visualisation.
 
 In contrast, bulk data focuses to features/genes for analysis. In this case its tidy representation with `tidySummarizedExperiment` prioritise features, exposing them to the user.
 
@@ -427,7 +421,7 @@ Join the endothelial marker PECAM1 (CD31, look for ENSEMBL ID), and plot in spac
 
 - Get the ENSEMBL ID
 - Join the feature to the tidy data abstraction
-- Calculate the 0.75 quantile across all pixels
+- Calculate the 0.75 quantile across all pixels `mutate()`
 - Label the cells with high PECAM1
 - Plot the slide colouring for the new label 
 :::
@@ -497,6 +491,8 @@ You will be able to apply the familiar `tidyverse` operations
 spe_regions_aggregated |> 
   filter(sample_id == "151673")
 ```
+
+
 
 ### 6. tidyfying your workflow
 
@@ -571,7 +567,7 @@ spatial_data <-
     qc_mitochondrial_transcription = subsets_mito_percent > 30
   )
 
-spatial_data
+spatial_data |> select(.cell, qc_mitochondrial_transcription)
 
 ```
 
@@ -613,9 +609,12 @@ genes <- !grepl(pattern = "^Rp[l|s]|Mt", x = rownames(spatial_data))
 
 marker_genes = 
   spatial_data |> 
+
+  # Grouping
   group_split(sample_id) |> 
-  map(~ 
-    .x |> 
+
+  # Loop across the list elements
+  map(~ .x |> 
       scran::modelGeneVar(subset.row = genes) |> 
       scran::getTopHVGs(n = 1000)
   ) |> 
@@ -676,6 +675,7 @@ spatial_data = spatial_data[,!colData(spatial_data)$discard ]
 
 spatial_data_filtered = 
   spatial_data |> 
+
   mutate(
     discard = 
       subsets_mito_percent > 30 |
@@ -712,7 +712,7 @@ Let’s visualise the regions that spatialLIBD labelled across three Visium 10X 
 spatial_data_filtered |> 
   ggspavis::plotSpots(annotate = "spatialLIBD") +
   facet_wrap(~sample_id) +
-    scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
+  scale_color_manual(values = libd_layer_colors |> str_remove("ayer")) +
   theme(legend.position = "none") +
   labs(title = "spatialLIBD regions")
 ```
@@ -721,11 +721,11 @@ spatial_data_filtered |>
 
 ```{r, fig.width=7, fig.height=8}
 spatial_data |> 
-    ggplot(aes(array_row, array_col)) +
-    geom_point(aes(color = spatialLIBD)) +
-    facet_wrap(~sample_id) +
-    theme(legend.position = "none") +
-    labs(title = "spatialLIBD regions")
+  ggplot(aes(array_row, array_col)) +
+  geom_point(aes(color = spatialLIBD)) +
+  facet_wrap(~sample_id) +
+  theme(legend.position = "none") +
+  labs(title = "spatialLIBD regions")
 ```
 
 #### Custom visualisation: Plotting RNA output
@@ -797,7 +797,6 @@ As you can appreciate, the relationship between the number of genes, probed Purc
 **Excercise 2.3**
 
 To to practice the use of `tidyomics` on spatial data, we propose a few exercises that connect manipulation, calculations and visualisation. These exercises are just meant to be simple use cases that exploit tidy R streamlined language.
-
 
 We assume that the cells we filtered as non-alive or damaged, characterised by being reached uniquely for mitochondrial, genes, and genes, linked to up ptosis. it is good practice to check these assumption. This exercise aims to estimate what genes are differentially expressed between filtered and unfiltered cells. Then visualise the results
 

@@ -132,17 +132,25 @@ theme(legend.position = "none") +
 ```{r}
 # Get top variable genes 
 genes <- !grepl(pattern = "^Rp[l|s]|Mt", x = rownames(spatial_data))
-hvg = scran::modelGeneVar(spatial_data, subset.row = genes, block = spatial_data$sample_id) 
-hvg = scran::getTopHVGs(dec, n = 1000)
+hvg = 
+  spatial_data |> 
+  scran::modelGeneVar(subset.row = genes, block = spatial_data$sample_id) |>
+  scran::getTopHVGs(n = 1000)
 
 # Calculate PCA
-spatial_data <- 
-  spatial_data |> 
+spatial_data |> 
+
   scuttle::logNormCounts() |> 
   scater::runPCA(subset_row = hvg) |> 
 
   # Calculate UMAP
   scater::runUMAP(dimred = "PCA") |> 
+
+  # Filter one sample
+  filter(in_tissue, sample_id=="151673") |> 
+  
+  # Gate based on tissue morphology
+  tidySpatialExperiment::gate_spatial(alpha = 0.1) |> 
 
   # Plot
   scater::plotUMAP(colour_by = ".gate")
@@ -159,10 +167,12 @@ rowData(spatial_data) |>
   as_tibble() |> 
   filter( gene_name == "PECAM1")
 
+gene = "ENSG00000261371"
+
 spatial_data |> 
 
   # Join the feature
-  join_features("ENSG00000261371", shape="wide") |> 
+  join_features(gene, shape="wide") |> 
 
   # Calculate the quantile
   mutate(my_quantile = quantile(ENSG00000261371, 0.75)) |> 
