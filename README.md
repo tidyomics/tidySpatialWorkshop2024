@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 [![DOI](https://zenodo.org/badge/379767139.svg)](https://zenodo.org/badge/latestdoi/379767139)
-[![Check, build, and push image](https://github.com/tidyomics/spatialOmicsWorkshop2024/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/spatialOmicsWorkshop2024/actions/workflows/basic_checks.yaml)
+[![Check, build, and push image](https://github.com/tidyomics/tidySpatialWorkshop2024/actions/workflows/basic_checks.yaml/badge.svg)](https://github.com/tidyomics/tidySpatialWorkshop2024/actions/workflows/basic_checks.yaml)
 <!-- badges: end -->
 
 ## Instructor names and contact information
@@ -12,9 +12,16 @@
 
 ## Syllabus
 
-Material [web page](https://tidyomics.github.io/spatialOmicsWorkshop2024/).
+Material [web page](https://tidyomics.github.io/tidySpatialWorkshop2024/)
 
 More details on the workshop are below.
+
+## Workshop partner: PHYSALIA
+
+<figure>
+<img src="inst/images/physalia-min.png" alt="visual cue" />
+<figcaption aria-hidden="true">visual cue</figcaption>
+</figure>
 
 ## Workshop package installation 
 
