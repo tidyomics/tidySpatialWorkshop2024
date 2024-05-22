@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 
 - TWITTER/X: https://x.com/LGMartelotto
 
-## Workshop partner: PHYSALIA
+## Workshop partner: Physalia
 
 ```{r, echo=FALSE, out.width="700px"}
 knitr::include_graphics(here("inst/images/physalia-min.png"))

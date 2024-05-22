@@ -16,11 +16,11 @@ Material [web page](https://tidyomics.github.io/tidySpatialWorkshop2024/)
 
 More details on the workshop are below.
 
-## Workshop partner: PHYSALIA
+## Workshop partner: Physalia
 
 <figure>
-<img src="inst/images/physalia-min.png" alt="visual cue" />
-<figcaption aria-hidden="true">visual cue</figcaption>
+<img src="inst/images/physalia-min.png" alt="Physalia" />
+<figcaption aria-hidden="true"></figcaption>
 </figure>
 
 ## Workshop package installation 
