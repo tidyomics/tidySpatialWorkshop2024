@@ -783,7 +783,6 @@ spatial_data_filtered |>
 Let's take a step further and group the correlations according to samples, to see whether different samples show different correlations.
 
 ```{r, fig.width=7, fig.height=8}
-
 spatial_data_filtered |> 
   ggplot(aes(subsets_mito_percent, sum_gene)) + 
   geom_point(aes(color = spatialLIBD), size=0.2) +  
@@ -792,7 +791,6 @@ spatial_data_filtered |>
   facet_wrap(~spatialLIBD) + 
   scale_y_log10() +
   theme_bw()
-
 ```
 
 As you can appreciate, the relationship between the number of genes, probed Purcell and their mitochondrial prescription abundance it's quite  consistent.
@@ -828,6 +826,11 @@ Amyloid plaques are extracellular deposits primarily composed of aggregated amyl
 
 Amyloid plaques can be found in the brains of mice, particularly in transgenic mouse models that are engineered to develop Alzheimer's disease-like pathology. 
 Although amyloid plaques themselves are extracellular, the presence and formation of these plaques are associated with specific gene expression changes in the surrounding and involved cells. These gene markers are indicative of the processes that contribute to amyloid plaque formation, as well as the cellular response to these plaques ([Ranman et al., 2021](https://molecularneurodegeneration.biomedcentral.com/articles/10.1186/s13024-021-00465-0).)
+
+- join_features()
+- mutate() 
+- ggspavis::plotSpots()
+:::
 
 ```{r}
 marker_genes_of_amyloid_plaques = c("APP", "PSEN1", "PSEN2", "CLU", "APOE", "CD68", "ITGAM", "AIF1")

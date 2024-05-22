@@ -326,7 +326,11 @@ tx_spe_file = tempfile()
 utils::download.file("https://zenodo.org/records/11213166/files/tx_spe.rda?download=1", destfile = tx_spe_file)
 # load("~/Downloads/tx_spe.rda")
 load(tx_spe_file)
+```
 
+A trivial edit to work with `ggspavis.`
+
+```{r}
 tx_spe = tx_spe |> mutate(in_tissue = TRUE) 
 ```
 

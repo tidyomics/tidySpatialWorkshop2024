@@ -233,11 +233,11 @@ differential_analysis |>
 :::
 
 ```{r, eval=FALSE}
-rownames(spatial_data) = rowData(spatial_data)$gene_name
+rownames(spatial_data_filtered) = rowData(spatial_data_filtered)$gene_name
 
 marker_genes_of_amyloid_plaques = c("APP", "PSEN1", "PSEN2", "CLU", "APOE", "CD68", "ITGAM", "AIF1")
 
-spatial_data |> 
+spatial_data_filtered |> 
 
 # Join the features
   join_features(marker_genes_of_amyloid_plaques, shape = "wide") |> 
@@ -253,7 +253,6 @@ spatial_data |>
     annotate = "amyloid_plaques_signature"
   ) + 
   facet_wrap(~sample_id)
-
 
 ```
 
