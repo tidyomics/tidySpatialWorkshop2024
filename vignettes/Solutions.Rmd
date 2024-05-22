@@ -69,7 +69,7 @@ plotSpotQC(
 :::
 
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=7, fig.height=8, eval=FALSE}
 
 res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$sample_id ) 
 
@@ -82,7 +82,7 @@ lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10])))
 :::
 
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=7, fig.height=8, eval=FALSE}
 
 res_spatialLIBD = split(data.frame(res$mat), colData(spatial_data_gene_name)$spatialLIBD ) 
 
@@ -94,7 +94,7 @@ lapply(res_spatialLIBD, function(x) plotCorrelationMatrix(as.matrix(x[,-10])))
 :::
 
 
-```{r, fig.width=7, fig.height=8}
+```{r, fig.width=7, fig.height=8, eval=FALSE}
 
 
 
@@ -129,7 +129,7 @@ theme(legend.position = "none") +
 **Exercise 2.1**
 :::
 
-```{r}
+```{r, eval=FALSE}
 # Get top variable genes 
 genes <- !grepl(pattern = "^Rp[l|s]|Mt", x = rownames(spatial_data))
 hvg = 
@@ -162,7 +162,7 @@ spatial_data |>
 :::
 
 
-```{r}
+```{r, eval=FALSE}
 rowData(spatial_data) |> 
   as_tibble() |> 
   filter( gene_name == "PECAM1")
@@ -191,7 +191,7 @@ spatial_data |>
 **Excercise 2.3**
 :::
 
-```{r}
+```{r, eval=FALSE}
 library(tidySummarizedExperiment)
 library(tidybulk)
   
@@ -211,6 +211,8 @@ differential_analysis =
   
   # filter regions having both alive and dead cells
   filter(  map_int(data, ~ .x |> distinct(sample_id, dead) |> nrow() ) == 6 ) |>
+
+  # DE analyses
   mutate(data = map(
     data,
     test_differential_abundance,
@@ -230,7 +232,7 @@ differential_analysis |>
 **Excercise 2.4**
 :::
 
-```{r}
+```{r, eval=FALSE}
 rownames(spatial_data) = rowData(spatial_data)$gene_name
 
 marker_genes_of_amyloid_plaques = c("APP", "PSEN1", "PSEN2", "CLU", "APOE", "CD68", "ITGAM", "AIF1")
@@ -252,5 +254,177 @@ spatial_data |>
   ) + 
   facet_wrap(~sample_id)
 
+
+```
+
+
+::: {.note}
+**Exercise 3.2** 
+:::
+
+```{r, eval=FALSE}
+mgs <- scran::scoreMarkers(
+  tx_spe_sample_1, 
+  groups = tx_spe_sample_1$clusters,
+  
+  # Omit mitochondrial genes and keep all the genes in spatial
+  subset.row = 
+    grep("NegControl.+|BLANK.+", rownames(tx_spe_sample_1), value=TRUE, invert=TRUE) 
+)
+
+# Select the most informative markers
+mgs_df <- lapply(names(mgs), function(i) {
+  x <- mgs[[i]]
+  
+  # Filter and keep relevant marker genes, those with AUC > 0.8
+  x <- x[x$mean.AUC > 0.8, ]
+  
+  # Sort the genes from highest to lowest weight
+  x <- x[order(x$mean.AUC, decreasing = TRUE), ]
+  
+  # Add gene and cluster id to the dataframe
+  x$gene <- rownames(x)
+  x$cluster <- i
+  data.frame(x)
+})
+
+head(mgs_df[[1]])
+
+tx_spe_sample_1 |> 
+  plotReducedDim("UMAP", colour_by="Gjc3")
+  
+```
+
+
+
+
+
+
+::: {.note}
+**Exercise 3.3**
+:::
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+library(Banksy)
+
+# scale the counts, without log transformation
+tx_spe_sample_1 = tx_spe_sample_1 |> logNormCounts(log=FALSE, name = "normcounts")
+```
+
+**Highly-variable genes**
+
+The Banksy documentation, suggest the use of `Seurat` for the detection of highly variable genes.
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+library(Seurat)
+
+"NegControl.+|BLANK.+"
+
+tx_spe_sample_1_seu = 
+  as.Seurat(tx_spe_sample_1, data = NULL) 
+
+genes <- !grepl(pattern = "NegControl.+|BLANK.+", x = rownames(tx_spe_sample_1_seu))
+
+
+tx_spe_sample_1_seu = tx_spe_sample_1_seu[genes,]
+
+tx_spe_sample_1_seu = tx_spe_sample_1_seu |> 
+  NormalizeData(scale.factor = 5000, normalization.method = 'RC')
+
+
+
+# Compute HVGs
+hvgs <-  VariableFeatures(FindVariableFeatures(tx_spe_sample_1_seu, nfeatures = 2000))
+
+
+rm(tx_spe_sample_1_seu)
+
+head(hvgs)
+```
+
+We now split the data by sample, to compute the neighbourhood matrices.
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+# Convert to list
+tx_spe_sample_1_banksy = tx_spe_sample_1[hvgs,]
+
+# Compute the component neighborhood matrices
+tx_spe_sample_1_banksy = tx_spe_sample_1_banksy |> 
+  computeBanksy( 
+  assay_name = "normcounts"
+  )
+
+```
+
+Here, we perform PCA using the BANKSY algorithm on the joint dataset. The group argument specifies how to treat different samples, ensuring that features are scaled separately per sample group to account for variations among them.
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+tx_spe_sample_1_banksy <- runBanksyPCA( # Run PCA on the Banskly matrix
+  tx_spe_sample_1_banksy, 
+  lambda = 0.2, # spatial weighting parameter. Larger values (e.g. 0.8) incorporate more spatial neighborhood
+  seed = 42
+)
+```
+
+Once the dimensional reduction is complete, we cluster the spots across all samples and use `connectClusters` to visually compare these new BANKSY clusters against manual annotations.
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+tx_spe_sample_1_banksy <- clusterBanksy( # clustering on the principal components computed on the BANKSY matrix
+  tx_spe_sample_1_banksy, 
+  lambda = 0.2, # spatial weighting parameter. Larger values (e.g. 0.8) incorporate more spatial neighborhood
+  resolution = 0.7, # numeric vector specifying resolution used for clustering (louvain / leiden).
+  seed = 42
+)
+```
+
+As an optional step, we smooth the cluster labels for each sample independently, which can enhance the visual coherence of clusters, especially in heterogeneous biological samples.
+
+From SpiceMix paper [Chidester et al., 2023](https://www.nature.com/articles/s41588-022-01256-z)
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+tx_spe_sample_1_banksy_smoothed = tx_spe_sample_1_banksy |> 
+ smoothLabels( 
+  cluster_names = "clust_M0_lam0.2_k50_res0.7",
+  k = 6L, 
+  verbose = FALSE
+)
+
+```
+
+The raw and smoothed cluster labels are stored in the `colData` slot of each `SingleCellExperiment` or `SpatialExperiment` object.
+
+Visualising Clusters and Annotations on Spatial Coordinates: We utilise the ggspavis package to visually map BANKSY clusters and manual annotations onto the spatial coordinates of the dataset, providing a comprehensive visual overview of spatial and clustering data relationships.
+
+```{r multi-sample-spatial, eval=TRUE, fig.width=3, fig.height=3}
+# Use scater:::.get_palette('tableau10medium')
+
+ ggspavis::plotSpots(
+   tx_spe_sample_1_banksy, 
+   annotate = "clust_M0_lam0.2_k50_res0.7"
+  ) +
+    guides(color = "none") +
+    labs(title = "BANKSY clusters")
+
+ ggspavis::plotSpots(
+   tx_spe_sample_1_banksy_smoothed, 
+   annotate = "clust_M0_lam0.2_k50_res0.7_smooth"
+  ) +
+    guides(color = "none") +
+    labs(title = "BANKSY clusters smoothed")
+ 
+# ggspavis::plotSpots(
+#   tx_spe_sample_1_banksy, 
+#   annotate = "clusters"
+#   ) +
+#     guides(color = "none") +
+#     labs(title = "cell clustering")
+
+ggspavis::plotSpots(
+tx_spe_sample_1_banksy, 
+annotate = "region"
+) +
+      scale_color_manual(values = colorRampPalette( brewer.pal(9,"Set1") )(150) ) +
+    guides(color = "none") +
+    labs(title = "ground truth")
 
 ```
