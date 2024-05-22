@@ -164,7 +164,7 @@ me
 ```
 In this object, besides the single molecule location, we have cell segmentation boundaries. We can use these boudaries to understand subcellular localisation of molecules and to aggregate molecules in cells.
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 ggplot_me() +
   geom_polygon_me(me, assayName = "cell", fill = "#F8DE7E", color="grey") +
   geom_point_me(me) +
@@ -177,7 +177,7 @@ ggplot_me() +
 
 In this object we don't only have the cell segmentation but the nucleous segmentation as well. 
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 boundaries(me, "nucleus") = readBoundaries(
   dataDir = repoDir,
   pattern = "nucleus_boundaries.csv",
@@ -338,7 +338,7 @@ tx_spe
 
 Let's have a look at how many cells have been detected for each region
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 tx_spe |> 
   add_count(region) |> 
   ggplot(aes(fct_reorder(region, n, .desc = TRUE))) +
@@ -487,7 +487,7 @@ In the previous sections we have seen how to do gene marker selection for sequen
 
 Too understand whether the cell clusters explain morphology as opposed to merely cell identity, we can color cells according to annotated region. As we can see we have a lot of regions. We have more regions that cell clusters.
 
-```{r}
+```{r, fig.width=7, fig.height=8}
 
 tx_spe_sample_1 |> 
   plotUMAP(colour_by = "region") +
