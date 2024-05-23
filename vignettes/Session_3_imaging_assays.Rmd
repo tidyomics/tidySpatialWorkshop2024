@@ -41,12 +41,14 @@ library(purrr)
 library(glue) # sprintf
 library(stringr)
 library(forcats)
+library(tibble)
 
 # Plotting
 library(colorspace)
 library(dittoSeq)
 library(ggspavis)
 library(RColorBrewer)
+library(ggspavis)
 
 # Analysis
 library(scuttle)
@@ -55,6 +57,7 @@ library(scran)
 
 # Data download
 library(ExperimentHub)
+library(SubcellularSpatialData)
 
 # Tidyomics
 library(tidySingleCellExperiment)
@@ -64,7 +67,7 @@ library(tidySpatialExperiment)
 # Niche analysis
 library(hoodscanR)
 library(scico)
-library(ggspavis)
+
 
 ```
 
@@ -73,7 +76,7 @@ library(ggspavis)
 This [data package](https://bioconductor.org/packages/release/data/experiment/html/SubcellularSpatialData.html) contains annotated datasets localized at the sub-cellular level from the STOmics, Xenium, and CosMx platforms, as analyzed in the publication by [Bhuva et al., 2024](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-024-03241-7). It includes raw transcript detections and provides functions to convert these into `SpatialExperiment` objects.
 
 ```{r, eval=FALSE}
-library(SubcellularSpatialData)
+
 eh = ExperimentHub(cache = "/vast/scratch/users/mangiola.s")
 query(eh, "SubcellularSpatialData")
 
@@ -111,7 +114,6 @@ tx_small |>
 We can appreciate how, even subsampling the data 1 in 500, we still have a vast amount of data to visualise.
 
 ```{r, fig.width=7, fig.height=8}
-
 tx_small |>
     ggplot(aes(x, y, colour = region)) +
     geom_point(pch = ".") +
@@ -301,10 +303,10 @@ gc()
 ::: {.note}
 **Exercise 3.1**
 
-We want to understand how much data we are discarting, that does not have a cell identity.
+We want to understand how much data we are discarding, that does not have a cell identity.
 
-- Using base r/Bioconductor grammar calculate what is the ratio of outside-cell vs within-cell, probes
-- Reproduce the same calculation with `tidyomics` 
+- Using base R grammar calculate what is the ratio of outside-cell vs within-cell, probes
+- Reproduce the same calculation with `tidyverse` 
 
 :::
 
@@ -326,6 +328,18 @@ tx_spe_file = tempfile()
 utils::download.file("https://zenodo.org/records/11213166/files/tx_spe.rda?download=1", destfile = tx_spe_file)
 # load("~/Downloads/tx_spe.rda")
 load(tx_spe_file)
+```
+
+Keep just the annotated regions.
+
+```{r}
+tx_spe  = tx_spe |> filter(!is.na(region))
+```
+
+Let have a look to the `SpatialExperiment`.
+
+```{r}
+tx_spe
 ```
 
 A trivial edit to work with `ggspavis.`
@@ -363,7 +377,7 @@ tx_spe =
 
 We then visualise what is the relationship between variance and total expression across cells.
 
-```{r, fig.width=7, fig.height=10}
+```{r, fig.width=3, fig.height=2}
 tx_spe |> 
   
   # Gene variance
@@ -404,6 +418,8 @@ top.hvgs =
   
   # Model gene variance and select variable genes per sample
   getTopHVGs(n=200) 
+
+top.hvgs
 ```
 
 The selected subset of genes can then be passed to the subset.row argument (or equivalent) in downstream steps. 
@@ -434,7 +450,7 @@ It operates in two phases:
 ```{r}
 cluster_labels = 
   tx_spe_sample_1 |> 
-   clusterCells(
+   scran::clusterCells(
      use.dimred="PCA", 
      BLUSPARAM=bluster::NNGraphParam(k=20, cluster.fun="louvain")
     ) |> 
@@ -450,6 +466,8 @@ Now we add this cluster column to our `SpatialExperiment`
 tx_spe_sample_1 = 
   tx_spe_sample_1 |> 
   mutate(clusters = cluster_labels)
+
+tx_spe_sample_1 |> select(.cell, clusters)
 ```
 
 As we have done before, we caculate UMAPs for visualisation purposes.
@@ -482,10 +500,13 @@ Let's try to understand the identity of these clusters performing gene marker de
 
 In the previous sections we have seen how to do gene marker selection for sequencing-based spatial data. We just have to adapt it to our current scenario.
 
-- Score the markers
-- Filter top markers
-- Focus on Cluster one and try to guess the cell type
-- Plot the umap colouring by the top marker of cluster 1 (plotReducedDim)
+- Score the markers (scran::scoreMarkers or tx_spe_sample_1)
+
+- Filter top markers (filter mean.AUC > 0.8)
+
+- Focus on Cluster 1 and try to guess the cell type (subset first element in the list, copy and paste the first 5 genes, and quickly look in public resources about what cell type those gene are markers of)
+
+- Plot the umap colouring by the top marker of cluster 1 (plotReducedDim())
 :::
 
 
@@ -582,13 +603,15 @@ We plot randomly plot 50 cells to see the output of neighborhood scanning using 
 
 ```{r, fig.width=7, fig.height=8}
 hoods |> 
-plotHoodMat(n = 50) 
+  plotHoodMat(n = 50) 
 ```
 
 We can then merge the neighborhood results with the `SpatialExperiment` object using `mergeHoodSpe` so that we can conduct more neighborhood-related analysis.
 
 ```{r}
 tx_spe_sample_1 =  tx_spe_sample_1 |> mergeHoodSpe(hoods)
+
+tx_spe_sample_1
 ```
 
 We can see what are the neighborhood distributions look like in each cluster using `plotProbDist.`
